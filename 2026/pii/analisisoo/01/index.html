@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profe Macón | Actividad</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <article class="brand-card">
+          <img
+            src="assets/LogoProfeMacon.jpg"
+            alt="Logo Profe Macón"
+            class="brand-logo"
+          />
+          <h1 class="brand-title">
+            Actividades interactivas de Programación Avanzada
+          </h1>
+          <p class="brand-subtitle">
+            Plataforma de práctica para el curso. El acceso a cada actividad se
+            habilita con una cuenta Google autorizada y luego se registra el
+            intento del estudiante.
+          </p>
+        </article>
+
+        <aside class="login-card">
+          <div class="eyebrow">Acceso seguro</div>
+          <h2 class="login-title">Ingresá para habilitar la actividad</h2>
+          <p class="login-text">
+            La autenticación se realiza con Google Sign-In
+          </p>
+
+          <div class="button-row">
+            <button class="btn btn-primary" id="loginBtn">Ingresar</button>
+
+          </div>
+
+          <p class="login-note">
+            Desarrollado en Visual Studio Code y publicado en GitHub Pages
+          </p>
+
+          <div class="status-box info" id="loginStatus">
+            IProf. Pablo Macón
+          </div>
+        </aside>
+      </section>
+
+      <section class="activity-section">
+        <article class="activity-card">
+          <header class="activity-header">
+            <div>
+              <h2>Reconocimiento de objetos, atributos y clases</h2>
+              <p>
+                Actividad autocorregible inicial. Esta pantalla muestra la
+                estructura visual de la plataforma con la prueba velada hasta
+                que el estudiante se autentique y sea validado.
+              </p>
+            </div>
+            <span class="badge" id="activityBadge">Actividad bloqueada</span>
+          </header>
+
+          <div class="questions-grid" id="questionsContainer"></div>
+
+          <div class="activity-actions">
+            <button class="btn btn-primary" id="submitBtn">
+              Enviar actividad
+            </button>
+          </div>
+
+          <div class="result-box" id="resultBox" style="display: none"></div>
+        </article>
+        <div class="confirm-modal" id="confirmModal" style="display: none">
+          <div class="confirm-modal-content">
+            <h3>Actividad incompleta</h3>
+            <p id="confirmMessage">
+              Hay preguntas sin responder. Si enviás ahora, se contarán como
+              incorrectas.
+            </p>
+            <div class="confirm-actions">
+              <button class="btn btn-secondary" id="cancelSubmitBtn">
+                Volver
+              </button>
+              <button class="btn btn-primary" id="confirmSubmitBtn">
+                Enviar de todos modos
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="activity-overlay" id="activityOverlay">
+          <div class="overlay-card">
+            <img
+              src="assets/logo_PM.png"
+              alt="Isotipo Profe Macón"
+              class="overlay-logo"
+            />
+            <h3>Actividad protegida</h3>
+            <p>
+              Para ver y realizar esta prueba debés ingresar con una cuenta
+              Google autorizada. Cuando la validación externa responda
+              correctamente, esta capa desaparecerá y la actividad quedará
+              habilitada.
+            </p>
+            <button class="btn btn-primary" id="overlayLoginBtn">
+              Ingresar
+            </button>
+            <div class="status-box info" id="overlayStatus">
+              Esperando autenticación.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="config.js"></script>
+    <script src="quiz-data.js"></script>
+    <script src="auth.js"></script>
+    <script src="results.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
