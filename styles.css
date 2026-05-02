@@ -15,6 +15,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   background: var(--gray-light);
@@ -24,30 +28,47 @@ body {
 
 /* HEADER */
 
-header {
+.site-header {
   background: var(--white);
   border-bottom: 4px solid var(--teal);
   padding: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition:
+    padding 0.25s ease,
+    border-bottom-width 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .header-container {
   max-width: 1200px;
   margin: auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "logo title"
+    "nav nav";
   align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 16px 24px;
 }
 
-.header-container img {
+.main-logo {
+  grid-area: logo;
   height: 70px;
   width: auto;
+  transition: height 0.25s ease;
+}
+
+.title-block {
+  grid-area: title;
 }
 
 .title-block h1 {
   font-size: 2rem;
   letter-spacing: 1px;
+  transition: font-size 0.25s ease;
 }
 
 .title-block p {
@@ -57,27 +78,65 @@ header {
 
 /* NAV */
 
-nav {
+.main-nav {
+  grid-area: nav;
   background: var(--black);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: auto;
   display: flex;
   gap: 20px;
   padding: 14px 20px;
   flex-wrap: wrap;
+  margin: 0 -20px -20px;
+  transition:
+    background 0.25s ease,
+    padding 0.25s ease,
+    margin 0.25s ease;
 }
 
-nav a {
+.main-nav a {
   color: var(--white);
   text-decoration: none;
   font-weight: bold;
   transition: 0.2s;
 }
 
-nav a:hover {
+.main-nav a:hover {
+  color: var(--teal);
+}
+
+/* HEADER COMPACTO AL HACER SCROLL */
+
+.site-header.compact {
+  padding: 8px 20px;
+  border-bottom-width: 3px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.site-header.compact .header-container {
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "logo nav";
+}
+
+.site-header.compact .main-logo {
+  height: 42px;
+}
+
+.site-header.compact .title-block {
+  display: none;
+}
+
+.site-header.compact .main-nav {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.site-header.compact .main-nav a {
+  color: var(--black);
+}
+
+.site-header.compact .main-nav a:hover {
   color: var(--teal);
 }
 
@@ -129,7 +188,9 @@ main {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-  transition: 0.2s;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   border-top: 5px solid var(--violet);
 }
 
@@ -146,6 +207,49 @@ main {
 .card p {
   color: var(--gray-dark);
   margin-bottom: 18px;
+}
+
+/* TARJETAS POR ASIGNATURA */
+
+.card-pi {
+  border-top-color: var(--teal);
+  background: linear-gradient(180deg, #ffffff 0%, rgba(0, 169, 157, 0.08) 100%);
+}
+
+.card-pii {
+  border-top-color: var(--violet);
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(152, 141, 179, 0.14) 100%
+  );
+}
+
+.card-bdi {
+  border-top-color: var(--gray-dark);
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(130, 125, 125, 0.12) 100%
+  );
+}
+
+.card-pi .btn {
+  background: var(--teal);
+}
+
+.card-pii .btn {
+  background: var(--violet);
+}
+
+.card-bdi .btn {
+  background: var(--gray-dark);
+}
+
+.card-pi .btn:hover,
+.card-pii .btn:hover,
+.card-bdi .btn:hover {
+  background: var(--black);
 }
 
 /* BUTTON */
@@ -182,13 +286,57 @@ footer small {
 /* RESPONSIVE */
 
 @media (max-width: 700px) {
+  .site-header {
+    padding: 16px;
+  }
+
   .header-container {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "logo"
+      "title"
+      "nav";
     align-items: flex-start;
+  }
+
+  .main-logo {
+    height: 56px;
   }
 
   .title-block h1 {
     font-size: 1.6rem;
+  }
+
+  .main-nav {
+    flex-direction: column;
+    gap: 12px;
+    width: calc(100% + 32px);
+    margin: 0 -16px -16px;
+    padding: 14px 16px;
+  }
+
+  .site-header.compact {
+    padding: 10px 16px;
+  }
+
+  .site-header.compact .header-container {
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "logo nav";
+    align-items: center;
+  }
+
+  .site-header.compact .main-logo {
+    height: 38px;
+  }
+
+  .site-header.compact .main-nav {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
   }
 
   .hero {
@@ -197,10 +345,5 @@ footer small {
 
   .hero h2 {
     font-size: 1.6rem;
-  }
-
-  .nav-container {
-    flex-direction: column;
-    gap: 12px;
   }
 }

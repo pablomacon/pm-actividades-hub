@@ -22,6 +22,7 @@ function renderQuestions() {
       const opcionesHtml = pregunta.opciones
         .map((opcion) => {
           const inputType = pregunta.tipo === "checkbox" ? "checkbox" : "radio";
+
           return `
             <label class="option">
               <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
@@ -89,7 +90,7 @@ async function handleLogin() {
 
   const validation = await AuthService.validateAccess({
     idToken: loginResult.idToken,
-    slug: window.APP_CONFIG.activitySlug
+    slug: window.APP_CONFIG.activitySlug,
   });
 
   if (validation.ok) {
@@ -97,37 +98,42 @@ async function handleLogin() {
     estudianteActual = estudiante;
 
     unlockActivity(
-      `Bienvenido/a, ${estudiante.nombre} ${estudiante.apellido}. Acceso autorizado para ${estudiante.titulo}.`
+      `Bienvenido/a, ${estudiante.nombre} ${estudiante.apellido}. Acceso autorizado para ${estudiante.titulo}.`,
     );
   } else {
-    showError(validation.message || "Tu cuenta no está habilitada para esta actividad.");
+    showError(
+      validation.message || "Tu cuenta no está habilitada para esta actividad.",
+    );
   }
 }
 
 function obtenerRespuestas() {
   return QUIZ_DATA.preguntas.map((pregunta) => {
     if (pregunta.tipo === "radio") {
-      const seleccionada = document.querySelector(`input[name="q${pregunta.numero}"]:checked`);
+      const seleccionada = document.querySelector(
+        `input[name="q${pregunta.numero}"]:checked`,
+      );
+
       return {
         numero: pregunta.numero,
-        respuesta: seleccionada ? seleccionada.value : null
+        respuesta: seleccionada ? seleccionada.value : null,
       };
     }
 
     if (pregunta.tipo === "checkbox") {
       const marcadas = Array.from(
-        document.querySelectorAll(`input[name="q${pregunta.numero}"]:checked`)
+        document.querySelectorAll(`input[name="q${pregunta.numero}"]:checked`),
       ).map((input) => input.value);
 
       return {
         numero: pregunta.numero,
-        respuesta: marcadas
+        respuesta: marcadas,
       };
     }
 
     return {
       numero: pregunta.numero,
-      respuesta: null
+      respuesta: null,
     };
   });
 }
@@ -135,97 +141,23 @@ function obtenerRespuestas() {
 function obtenerPreguntasSinResponder() {
   return QUIZ_DATA.preguntas.filter((pregunta) => {
     if (pregunta.tipo === "radio") {
-      const seleccionada = document.querySelector(`input[name="q${pregunta.numero}"]:checked`);
+      const seleccionada = document.querySelector(
+        `input[name="q${pregunta.numero}"]:checked`,
+      );
+
       return !seleccionada;
     }
 
     if (pregunta.tipo === "checkbox") {
-      const marcadas = document.querySelectorAll(`input[name="q${pregunta.numero}"]:checked`);
+      const marcadas = document.querySelectorAll(
+        `input[name="q${pregunta.numero}"]:checked`,
+      );
+
       return marcadas.length === 0;
     }
 
     return true;
   });
-}
-
-function corregirActividad() {
-  const respuestasUsuario = obtenerRespuestas();
-  let puntajeObtenido = 0;
-
-  const respuestasCorregidas = QUIZ_DATA.preguntas.map((pregunta) => {
-    const respuestaUsuario = respuestasUsuario.find((r) => r.numero === pregunta.numero);
-
-    let esCorrecta = false;
-    let respuestaDada = respuestaUsuario?.respuesta ?? null;
-    let respuestaCorrecta = "";
-
-    if (pregunta.tipo === "radio") {
-      const correcta = pregunta.opciones.find((op) => op.correcta);
-      esCorrecta = respuestaDada === correcta.valor;
-      respuestaCorrecta = correcta.valor;
-    }
-
-    if (pregunta.tipo === "checkbox") {
-      const correctas = pregunta.opciones
-        .filter((op) => op.correcta)
-        .map((op) => op.valor)
-        .sort();
-
-      const dadas = Array.isArray(respuestaDada) ? [...respuestaDada].sort() : [];
-      esCorrecta = JSON.stringify(correctas) === JSON.stringify(dadas);
-      respuestaDada = dadas.join("|");
-      respuestaCorrecta = correctas.join("|");
-    }
-
-    if (esCorrecta) {
-      puntajeObtenido += pregunta.puntaje;
-    }
-
-    return {
-      numero_pregunta: pregunta.numero,
-      tipo_pregunta: pregunta.tipo,
-      enunciado_pregunta: pregunta.enunciado,
-      respuesta_dada: Array.isArray(respuestaUsuario?.respuesta)
-        ? respuestaUsuario.respuesta.join("|")
-        : respuestaUsuario?.respuesta ?? "",
-      respuesta_correcta: respuestaCorrecta,
-      es_correcta: esCorrecta
-    };
-  });
-
-  const puntajeTotal = QUIZ_DATA.puntajeTotal;
-  const porcentaje = Math.round((puntajeObtenido / puntajeTotal) * 100);
-
-  let juicio = "";
-  let devolucion = "";
-  let claseResultado = "";
-
-  if (porcentaje < 50) {
-    juicio = "Inicial";
-    devolucion =
-      "Tenés dificultades para reconocer clases, objetos y atributos. Te conviene revisar los ejemplos trabajados en clase y volver a intentarlo.";
-    claseResultado = "error";
-  } else if (porcentaje < 76) {
-    juicio = "En proceso";
-    devolucion =
-      "Reconocés varios elementos correctamente, pero todavía hay confusiones entre atributos, métodos y relaciones. Revisá tus respuestas e intentá nuevamente.";
-    claseResultado = "warning";
-  } else {
-    juicio = "Logrado";
-    devolucion =
-      "Buen trabajo. Lograste reconocer adecuadamente clases, objetos, atributos y relaciones simples.";
-    claseResultado = "success";
-  }
-
-  return {
-    puntajeObtenido,
-    puntajeTotal,
-    porcentaje,
-    juicio,
-    devolucion,
-    claseResultado,
-    respuestasCorregidas
-  };
 }
 
 function mostrarResultado(resultado) {
@@ -239,49 +171,8 @@ function mostrarResultado(resultado) {
   `;
 }
 
-function mostrarErroresPorPregunta(resultado) {
-  QUIZ_DATA.preguntas.forEach((pregunta) => {
-    const questionCard = document.getElementById(`question-${pregunta.numero}`);
-    const feedback = document.getElementById(`feedback-${pregunta.numero}`);
-
-    if (!questionCard || !feedback) return;
-
-    questionCard.classList.remove(
-      "question-correct",
-      "question-incorrect",
-      "question-incomplete"
-    );
-    feedback.textContent = "";
-
-    const respuesta = resultado.respuestasCorregidas.find(
-      (r) => r.numero_pregunta === pregunta.numero
-    );
-
-    const sinResponder =
-      !respuesta ||
-      respuesta.respuesta_dada === null ||
-      respuesta.respuesta_dada === undefined ||
-      respuesta.respuesta_dada === "";
-
-    if (sinResponder) {
-      questionCard.classList.add("question-incomplete");
-      feedback.textContent = "Sin responder. Se contó como incorrecta.";
-      return;
-    }
-
-    if (respuesta.es_correcta) {
-      questionCard.classList.add("question-correct");
-      feedback.textContent = "Correcta.";
-    } else {
-      questionCard.classList.add("question-incorrect");
-      feedback.textContent = "Incorrecta.";
-    }
-  });
-}
-
 function abrirConfirmacionIncompleta(cantidad) {
-  confirmMessage.textContent =
-    `Hay ${cantidad} pregunta(s) sin responder. Si enviás ahora, se contarán como incorrectas.`;
+  confirmMessage.textContent = `Hay ${cantidad} pregunta(s) sin responder. Si enviás ahora, se contarán como incorrectas.`;
   confirmModal.style.display = "flex";
 }
 
@@ -292,27 +183,79 @@ function cerrarConfirmacionIncompleta() {
 async function procesarEnvioActividad() {
   if (intentoGuardado) return;
 
-  const resultado = corregirActividad();
-  mostrarResultado(resultado);
-  mostrarErroresPorPregunta(resultado);
-
   if (!estudianteActual || !estudianteActual.id) {
     showError("No se pudo identificar al estudiante actual.");
     return;
   }
 
+  const respuestasUsuario = obtenerRespuestas();
+
   submitBtn.disabled = true;
+  submitBtn.textContent = "Corrigiendo...";
+
+  let data;
+
+  try {
+    const response = await fetch(window.APP_CONFIG.apiBaseUrl + "/corregir", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        estudianteId: estudianteActual.id,
+        slug: window.APP_CONFIG.activitySlug,
+        respuestas: respuestasUsuario.reduce((acc, r) => {
+          acc[r.numero] = r.respuesta;
+          return acc;
+        }, {}),
+      }),
+    });
+
+    data = await response.json();
+  } catch (error) {
+    showError("Error al conectar con el servidor de corrección.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Enviar actividad";
+    return;
+  }
+
+  if (!data.ok) {
+    showError(data.message || "Error al corregir la actividad.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Enviar actividad";
+    return;
+  }
+
+  const porcentaje = Math.round((data.puntaje / data.total) * 100);
+
+  const juicio =
+    porcentaje >= 76 ? "Logrado" : porcentaje >= 50 ? "En proceso" : "Inicial";
+
+  const claseResultado =
+    porcentaje >= 76 ? "success" : porcentaje >= 50 ? "warning" : "error";
+
+  const devolucion = "Resultado calculado automáticamente.";
+
+  mostrarResultado({
+    puntajeObtenido: data.puntaje,
+    puntajeTotal: data.total,
+    porcentaje,
+    juicio,
+    devolucion,
+    claseResultado,
+  });
+
   submitBtn.textContent = "Guardando...";
 
   const payload = {
     estudiante_id: estudianteActual.id,
     actividad_slug: window.APP_CONFIG.activitySlug,
-    puntaje_obtenido: resultado.puntajeObtenido,
-    puntaje_total: resultado.puntajeTotal,
-    porcentaje: resultado.porcentaje,
-    juicio: resultado.juicio,
-    devolucion: resultado.devolucion,
-    respuestas: resultado.respuestasCorregidas
+    puntaje_obtenido: data.puntaje,
+    puntaje_total: data.total,
+    porcentaje,
+    juicio,
+    devolucion,
+    respuestas: respuestasUsuario,
   };
 
   const guardado = await ResultsService.guardarIntento(payload);

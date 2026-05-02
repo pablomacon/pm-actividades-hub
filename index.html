@@ -12,26 +12,28 @@
   </head>
 
   <body>
-    <header>
+    <header class="site-header" id="siteHeader">
       <div class="header-container">
-        <img src="assets/LogoProfeMacon.jpg" alt="Logo Profe Macón" />
+        <img
+          src="assets/LogoProfeMacon.jpg"
+          alt="Logo Profe Macón"
+          class="main-logo"
+        />
 
         <div class="title-block">
           <h1>ACTIVIDADES INTERACTIVAS</h1>
           <p>Hub oficial de recursos digitales de Profe Macón</p>
         </div>
+
+        <nav class="main-nav">
+          <a href="#">Inicio</a>
+          <a href="#">Programación I</a>
+          <a href="#">Programación Avanzada</a>
+          <a href="#">Base de Datos</a>
+          <a href="#">Contacto</a>
+        </nav>
       </div>
     </header>
-
-    <nav>
-      <div class="nav-container">
-        <a href="#">Inicio</a>
-        <a href="#">Programación I</a>
-        <a href="#">Programación Avanzada</a>
-        <a href="#">Base de Datos</a>
-        <a href="#">Contacto</a>
-      </div>
-    </nav>
 
     <main>
       <section class="hero">
@@ -46,7 +48,7 @@
       <h2 class="section-title">Espacios curriculares</h2>
 
       <section class="grid">
-        <article class="card">
+        <article class="card card-pi">
           <h3>Programación I</h3>
           <p>
             Variables, condicionales, ciclos, arreglos, clases básicas y lógica.
@@ -54,13 +56,13 @@
           <a href="#" class="btn">Ingresar</a>
         </article>
 
-        <article class="card">
+        <article class="card card-pii">
           <h3>Programación Avanzada</h3>
           <p>POO, UML, herencia, colecciones, JDBC y proyecto integrador.</p>
           <a href="2026/pii/analisisoo/01/" class="btn">Ingresar</a>
         </article>
 
-        <article class="card">
+        <article class="card card-bdi">
           <h3>Base de Datos</h3>
           <p>Modelado, SQL, consultas, joins y diseño relacional.</p>
           <a href="#" class="btn">Ingresar</a>
@@ -82,5 +84,6 @@
       <p>Profe Macón © 2026</p>
       <small>Educación, tecnología y aprendizaje real.</small>
     </footer>
+    <script src="app.js"></script>
   </body>
 </html>
