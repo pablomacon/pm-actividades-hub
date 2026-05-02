@@ -1,9 +1,27 @@
 const siteHeader = document.getElementById("siteHeader");
 
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 40) {
+let isCompact = false;
+let ticking = false;
+
+function updateHeader() {
+  const scrollY = window.scrollY;
+
+  if (!isCompact && scrollY > 140) {
     siteHeader.classList.add("compact");
-  } else {
+    isCompact = true;
+  }
+
+  if (isCompact && scrollY < 30) {
     siteHeader.classList.remove("compact");
+    isCompact = false;
+  }
+
+  ticking = false;
+}
+
+window.addEventListener("scroll", () => {
+  if (!ticking) {
+    window.requestAnimationFrame(updateHeader);
+    ticking = true;
   }
 });

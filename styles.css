@@ -130,10 +130,12 @@ body {
   background: transparent;
   justify-content: flex-end;
   align-items: center;
+  transition: none;
 }
 
 .site-header.compact .main-nav a {
   color: var(--black);
+  opacity: 1;
 }
 
 .site-header.compact .main-nav a:hover {
