@@ -16,6 +16,9 @@ const confirmSubmitBtn = document.getElementById("confirmSubmitBtn");
 let estudianteActual = null;
 let intentoGuardado = false;
 
+const params = new URLSearchParams(window.location.search);
+const modoRevision = params.get("modo") === "revision";
+
 function renderQuestions() {
   questionsContainer.innerHTML = QUIZ_DATA.preguntas
     .map((pregunta) => {
@@ -171,6 +174,116 @@ function mostrarResultado(resultado) {
   `;
 }
 
+function normalizarTextoRespuesta(valor) {
+  if (valor === null || valor === undefined) return "";
+  return String(valor);
+}
+
+function respuestaIncluyeValor(respuestaDada, valor) {
+  const texto = normalizarTextoRespuesta(respuestaDada);
+
+  return texto
+    .split("|")
+    .map((v) => v.trim())
+    .includes(valor);
+}
+
+function aplicarRevision(respuestas) {
+  respuestas.forEach((respuesta) => {
+    const numero = respuesta.numero_pregunta;
+    const preguntaCard = document.getElementById(`question-${numero}`);
+    const feedback = document.getElementById(`feedback-${numero}`);
+
+    if (!preguntaCard) return;
+
+    const inputs = preguntaCard.querySelectorAll(`input[name="q${numero}"]`);
+
+    inputs.forEach((input) => {
+      input.disabled = true;
+
+      if (respuestaIncluyeValor(respuesta.respuesta_dada, input.value)) {
+        input.checked = true;
+      }
+    });
+
+    if (respuesta.es_correcta) {
+      preguntaCard.classList.add("question-correct");
+      feedback.textContent = "Correcta.";
+    } else {
+      preguntaCard.classList.add("question-incorrect");
+      feedback.textContent = "Incorrecta.";
+    }
+  });
+}
+
+async function cargarMejorIntento() {
+  const idToken = sessionStorage.getItem("pm_id_token");
+
+  if (!idToken) {
+    showError(
+      "Para ver el intento necesitás ingresar desde el hub de actividades.",
+    );
+    return;
+  }
+
+  showInfo("Cargando mejor intento...");
+
+  try {
+    const response = await fetch(
+      `${window.APP_CONFIG.apiBaseUrl}/intentos/mejor`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken,
+          actividadSlug: window.APP_CONFIG.activitySlug,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      showError(data.message || "No se pudo cargar el intento.");
+      return;
+    }
+
+    document.body.classList.add("authorized");
+
+    if (activityBadge) {
+      activityBadge.textContent = "Modo revisión";
+      activityBadge.classList.add("badge-enabled");
+    }
+
+    aplicarRevision(data.respuestas);
+
+    const porcentaje = Math.round(Number(data.intento.porcentaje));
+
+    const claseResultado =
+      porcentaje >= 76 ? "success" : porcentaje >= 50 ? "warning" : "error";
+
+    mostrarResultado({
+      puntajeObtenido: data.intento.puntaje_obtenido,
+      puntajeTotal: data.intento.puntaje_total,
+      porcentaje,
+      juicio: data.intento.juicio,
+      devolucion: data.intento.devolucion,
+      claseResultado,
+    });
+
+    submitBtn.style.display = "none";
+    loginBtn.disabled = true;
+    overlayLoginBtn.disabled = true;
+    loginBtn.textContent = "Modo revisión";
+    overlayLoginBtn.textContent = "Modo revisión";
+  } catch (error) {
+    console.error(error);
+    showError("Error al conectar con el servidor para cargar el intento.");
+  }
+}
+
 function abrirConfirmacionIncompleta(cantidad) {
   confirmMessage.textContent = `Hay ${cantidad} pregunta(s) sin responder. Si enviás ahora, se contarán como incorrectas.`;
   confirmModal.style.display = "flex";
@@ -293,3 +406,7 @@ confirmSubmitBtn.addEventListener("click", () => {
 });
 
 renderQuestions();
+
+if (modoRevision) {
+  cargarMejorIntento();
+}
