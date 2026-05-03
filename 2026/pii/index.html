@@ -7,13 +7,20 @@
   </head>
 
   <body>
-    <header class="site-header">
+    <header class="site-header" id="siteHeader">
       <div class="header-container">
-        <img src="/assets/LogoProfeMacon.jpg" class="main-logo" />
+        <a href="/" class="logo-link">
+          <img src="/assets/LogoProfeMacon.jpg" class="main-logo" />
+        </a>
+
         <div class="title-block">
           <h1>Programación Avanzada</h1>
           <p>Tus actividades</p>
         </div>
+
+        <nav class="main-nav">
+          <a href="/">← Hub general</a>
+        </nav>
       </div>
     </header>
 
@@ -34,5 +41,6 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>
+    <script src="/header.js"></script>
   </body>
 </html>
