@@ -353,3 +353,18 @@ footer small {
     font-size: 1.6rem;
   }
 }
+.card-realizada {
+  border-top-color: var(--teal);
+}
+
+.card-pendiente {
+  border-top-color: var(--violet);
+}
+
+.btn-done {
+  background: var(--gray-dark);
+}
+
+.btn-done:hover {
+  background: var(--black);
+}

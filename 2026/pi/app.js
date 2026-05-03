@@ -57,22 +57,30 @@ async function cargarActividades() {
 function renderActividades(actividades) {
   contenedor.innerHTML = actividades
     .map((a) => {
-      const estado = a.intentos_realizados > 0 ? "Realizada" : "Pendiente";
+      const realizada = a.intentos_realizados > 0;
 
-      const info =
-        a.intentos_realizados > 0
-          ? `<p><strong>Mejor:</strong> ${a.mejor_porcentaje}%</p>
-         <p><strong>Intentos:</strong> ${a.intentos_realizados}</p>`
-          : `<p><strong>Estado:</strong> Pendiente</p>`;
+      const badge = realizada
+        ? `<p><strong>Estado:</strong> Realizada</p>`
+        : `<p><strong>Estado:</strong> Pendiente</p>`;
+
+      const info = realizada
+        ? `<p><strong>Mejor:</strong> ${a.mejor_porcentaje}%</p>
+           <p><strong>Intentos:</strong> ${a.intentos_realizados}</p>`
+        : "";
+
+      const botonTexto = realizada ? "Ver mejor intento" : "Entrar";
+      const botonClase = realizada ? "btn btn-done" : "btn";
+      const url = realizada ? `${a.url}?modo=revision` : a.url;
 
       return `
-      <article class="card">
-        <h3>${a.titulo}</h3>
-        <p>${a.descripcion || ""}</p>
-        ${info}
-        <a href="${a.url}" class="btn">Entrar</a>
-      </article>
-    `;
+        <article class="card ${realizada ? "card-realizada" : "card-pendiente"}">
+          <h3>${a.titulo}</h3>
+          <p>${a.descripcion || ""}</p>
+          ${badge}
+          ${info}
+          <a href="${url}" class="${botonClase}">${botonTexto}</a>
+        </article>
+      `;
     })
     .join("");
 }
