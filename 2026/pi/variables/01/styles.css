@@ -499,3 +499,18 @@ body.authorized .activity-overlay {
     align-items: stretch;
   }
 }
+
+.text-answer {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 148, 148, 0.3);
+  background: #ffffff;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.text-answer:disabled {
+  background: #f4f2f5;
+  color: #827d7d;
+}
