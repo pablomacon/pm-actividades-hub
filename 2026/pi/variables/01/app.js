@@ -16,55 +16,32 @@ const confirmSubmitBtn = document.getElementById("confirmSubmitBtn");
 let estudianteActual = null;
 let intentoGuardado = false;
 
-function normalizarTexto(texto) {
-  return texto
-    .trim()
-    .replace(/\s+/g, " ")
-    .replace(/\s*;\s*/g, ";")
-    .toLowerCase();
-}
+const params = new URLSearchParams(window.location.search);
+const modoRevision = params.get("modo") === "revision";
 
 function renderQuestions() {
   questionsContainer.innerHTML = QUIZ_DATA.preguntas
     .map((pregunta) => {
-      let contenidoOpciones = "";
+      const opcionesHtml = pregunta.opciones
+        .map((opcion) => {
+          const inputType = pregunta.tipo === "checkbox" ? "checkbox" : "radio";
 
-      if (pregunta.tipo === "checkbox" || pregunta.tipo === "radio") {
-        const opcionesHtml = pregunta.opciones
-          .map((opcion) => {
-            const inputType =
-              pregunta.tipo === "checkbox" ? "checkbox" : "radio";
-            return `
-              <label class="option">
-                <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
-                ${opcion.texto}
-              </label>
-            `;
-          })
-          .join("");
-
-        contenidoOpciones = `<div class="option-list">${opcionesHtml}</div>`;
-      }
-
-      if (pregunta.tipo === "text") {
-        contenidoOpciones = `
-          <div class="option-list">
-            <input
-              type="text"
-              class="text-answer"
-              id="q${pregunta.numero}"
-              name="q${pregunta.numero}"
-              placeholder="${pregunta.placeholder || "Escribí tu respuesta acá"}"
-            />
-          </div>
-        `;
-      }
+          return `
+            <label class="option">
+              <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
+              ${opcion.texto}
+            </label>
+          `;
+        })
+        .join("");
 
       return `
         <section class="question-card" id="question-${pregunta.numero}">
           <div class="question-number">${pregunta.numero}</div>
-          <h3 class="question-title">${pregunta.enunciado.replace(/\n/g, "<br>")}</h3>
-          ${contenidoOpciones}
+          <h3 class="question-title">${pregunta.enunciado}</h3>
+          <div class="option-list">
+            ${opcionesHtml}
+          </div>
           <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
         </section>
       `;
@@ -94,6 +71,25 @@ function unlockActivity(message = "Acceso habilitado.") {
   overlayLoginBtn.textContent = "Ingresado";
 }
 
+function unlockRevisionMode(message = "Modo revisión habilitado.") {
+  document.body.classList.add("authorized");
+  setStatus(loginStatus, "success", message);
+  setStatus(overlayStatus, "success", message);
+
+  if (activityBadge) {
+    activityBadge.textContent = "Modo revisión";
+    activityBadge.classList.add("badge-enabled");
+  }
+
+  loginBtn.disabled = true;
+  overlayLoginBtn.disabled = true;
+
+  loginBtn.textContent = "Modo revisión";
+  overlayLoginBtn.textContent = "Modo revisión";
+
+  submitBtn.style.display = "none";
+}
+
 function showInfo(message) {
   setStatus(loginStatus, "info", message);
   setStatus(overlayStatus, "info", message);
@@ -111,6 +107,13 @@ async function handleLogin() {
 
   if (!loginResult.ok) {
     showError(loginResult.message || "No se pudo iniciar la autenticación.");
+    return;
+  }
+
+  sessionStorage.setItem("pm_id_token", loginResult.idToken);
+
+  if (modoRevision) {
+    await cargarMejorIntento();
     return;
   }
 
@@ -139,6 +142,7 @@ function obtenerRespuestas() {
       const seleccionada = document.querySelector(
         `input[name="q${pregunta.numero}"]:checked`,
       );
+
       return {
         numero: pregunta.numero,
         respuesta: seleccionada ? seleccionada.value : null,
@@ -156,14 +160,6 @@ function obtenerRespuestas() {
       };
     }
 
-    if (pregunta.tipo === "text") {
-      const input = document.getElementById(`q${pregunta.numero}`);
-      return {
-        numero: pregunta.numero,
-        respuesta: input ? input.value : "",
-      };
-    }
-
     return {
       numero: pregunta.numero,
       respuesta: null,
@@ -177,6 +173,7 @@ function obtenerPreguntasSinResponder() {
       const seleccionada = document.querySelector(
         `input[name="q${pregunta.numero}"]:checked`,
       );
+
       return !seleccionada;
     }
 
@@ -184,107 +181,12 @@ function obtenerPreguntasSinResponder() {
       const marcadas = document.querySelectorAll(
         `input[name="q${pregunta.numero}"]:checked`,
       );
-      return marcadas.length === 0;
-    }
 
-    if (pregunta.tipo === "text") {
-      const input = document.getElementById(`q${pregunta.numero}`);
-      return !input || input.value.trim() === "";
+      return marcadas.length === 0;
     }
 
     return true;
   });
-}
-
-function corregirActividad() {
-  const respuestasUsuario = obtenerRespuestas();
-  let puntajeObtenido = 0;
-
-  const respuestasCorregidas = QUIZ_DATA.preguntas.map((pregunta) => {
-    const respuestaUsuario = respuestasUsuario.find(
-      (r) => r.numero === pregunta.numero,
-    );
-
-    let esCorrecta = false;
-    let respuestaDada = respuestaUsuario?.respuesta ?? null;
-    let respuestaCorrecta = "";
-
-    if (pregunta.tipo === "radio") {
-      const correcta = pregunta.opciones.find((op) => op.correcta);
-      esCorrecta = respuestaDada === correcta.valor;
-      respuestaCorrecta = correcta.valor;
-    }
-
-    if (pregunta.tipo === "checkbox") {
-      const correctas = pregunta.opciones
-        .filter((op) => op.correcta)
-        .map((op) => op.valor)
-        .sort();
-
-      const dadas = Array.isArray(respuestaDada)
-        ? [...respuestaDada].sort()
-        : [];
-      esCorrecta = JSON.stringify(correctas) === JSON.stringify(dadas);
-      respuestaDada = dadas.join("|");
-      respuestaCorrecta = correctas.join("|");
-    }
-
-    if (pregunta.tipo === "text") {
-      const esperada = normalizarTexto(pregunta.respuestaEsperada);
-      const dada = normalizarTexto(respuestaDada || "");
-      esCorrecta = dada === esperada;
-      respuestaCorrecta = pregunta.respuestaEsperada;
-    }
-
-    if (esCorrecta) {
-      puntajeObtenido += pregunta.puntaje;
-    }
-
-    return {
-      numero_pregunta: pregunta.numero,
-      tipo_pregunta: pregunta.tipo,
-      enunciado_pregunta: pregunta.enunciado,
-      respuesta_dada: Array.isArray(respuestaUsuario?.respuesta)
-        ? respuestaUsuario.respuesta.join("|")
-        : (respuestaUsuario?.respuesta ?? ""),
-      respuesta_correcta: respuestaCorrecta,
-      es_correcta: esCorrecta,
-    };
-  });
-
-  const puntajeTotal = QUIZ_DATA.puntajeTotal;
-  const porcentaje = Math.round((puntajeObtenido / puntajeTotal) * 100);
-
-  let juicio = "";
-  let devolucion = "";
-  let claseResultado = "";
-
-  if (porcentaje < 50) {
-    juicio = "Inicial";
-    devolucion =
-      "Todavía hay dificultades para reconocer tipos de datos, declaración, asignación y actualización de variables. Conviene revisar el material y volver a intentarlo.";
-    claseResultado = "error";
-  } else if (porcentaje < 76) {
-    juicio = "En proceso";
-    devolucion =
-      "Reconocés varios conceptos correctamente, pero todavía hay confusiones entre tipo, valor, compatibilidad y cambios de una variable.";
-    claseResultado = "warning";
-  } else {
-    juicio = "Logrado";
-    devolucion =
-      "Buen trabajo. Lograste identificar y usar correctamente variables, tipos de datos y lectura simple de código en Java.";
-    claseResultado = "success";
-  }
-
-  return {
-    puntajeObtenido,
-    puntajeTotal,
-    porcentaje,
-    juicio,
-    devolucion,
-    claseResultado,
-    respuestasCorregidas,
-  };
 }
 
 function mostrarResultado(resultado) {
@@ -298,44 +200,103 @@ function mostrarResultado(resultado) {
   `;
 }
 
-function mostrarErroresPorPregunta(resultado) {
-  QUIZ_DATA.preguntas.forEach((pregunta) => {
-    const questionCard = document.getElementById(`question-${pregunta.numero}`);
-    const feedback = document.getElementById(`feedback-${pregunta.numero}`);
+function normalizarTextoRespuesta(valor) {
+  if (valor === null || valor === undefined) return "";
+  return String(valor);
+}
 
-    if (!questionCard || !feedback) return;
+function respuestaIncluyeValor(respuestaDada, valor) {
+  const texto = normalizarTextoRespuesta(respuestaDada);
 
-    questionCard.classList.remove(
-      "question-correct",
-      "question-incorrect",
-      "question-incomplete",
-    );
-    feedback.textContent = "";
+  return texto
+    .split("|")
+    .map((v) => v.trim())
+    .includes(valor);
+}
 
-    const respuesta = resultado.respuestasCorregidas.find(
-      (r) => r.numero_pregunta === pregunta.numero,
-    );
+function aplicarRevision(respuestas) {
+  respuestas.forEach((respuesta) => {
+    const numero = respuesta.numero_pregunta;
+    const preguntaCard = document.getElementById(`question-${numero}`);
+    const feedback = document.getElementById(`feedback-${numero}`);
 
-    const sinResponder =
-      !respuesta ||
-      respuesta.respuesta_dada === null ||
-      respuesta.respuesta_dada === undefined ||
-      respuesta.respuesta_dada === "";
+    if (!preguntaCard) return;
 
-    if (sinResponder) {
-      questionCard.classList.add("question-incomplete");
-      feedback.textContent = "Sin responder. Se contó como incorrecta.";
-      return;
-    }
+    const inputs = preguntaCard.querySelectorAll(`input[name="q${numero}"]`);
+
+    inputs.forEach((input) => {
+      input.disabled = true;
+
+      if (respuestaIncluyeValor(respuesta.respuesta_dada, input.value)) {
+        input.checked = true;
+      }
+    });
 
     if (respuesta.es_correcta) {
-      questionCard.classList.add("question-correct");
+      preguntaCard.classList.add("question-correct");
       feedback.textContent = "Correcta.";
     } else {
-      questionCard.classList.add("question-incorrect");
+      preguntaCard.classList.add("question-incorrect");
       feedback.textContent = "Incorrecta.";
     }
   });
+}
+
+async function cargarMejorIntento() {
+  const idToken = sessionStorage.getItem("pm_id_token");
+
+  if (!idToken) {
+    submitBtn.style.display = "none";
+    showInfo("Para ver el mejor intento, ingresá con Google.");
+    return;
+  }
+
+  submitBtn.style.display = "none";
+  showInfo("Cargando mejor intento...");
+
+  try {
+    const response = await fetch(
+      `${window.APP_CONFIG.apiBaseUrl}/intentos/mejor`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken,
+          actividadSlug: window.APP_CONFIG.activitySlug,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      showError(data.message || "No se pudo cargar el intento.");
+      return;
+    }
+
+    unlockRevisionMode("Mostrando el mejor intento registrado.");
+
+    aplicarRevision(data.respuestas);
+
+    const porcentaje = Math.round(Number(data.intento.porcentaje));
+
+    const claseResultado =
+      porcentaje >= 76 ? "success" : porcentaje >= 50 ? "warning" : "error";
+
+    mostrarResultado({
+      puntajeObtenido: data.intento.puntaje_obtenido,
+      puntajeTotal: data.intento.puntaje_total,
+      porcentaje,
+      juicio: data.intento.juicio,
+      devolucion: data.intento.devolucion,
+      claseResultado,
+    });
+  } catch (error) {
+    console.error(error);
+    showError("Error al conectar con el servidor para cargar el intento.");
+  }
 }
 
 function abrirConfirmacionIncompleta(cantidad) {
@@ -348,29 +309,86 @@ function cerrarConfirmacionIncompleta() {
 }
 
 async function procesarEnvioActividad() {
-  if (intentoGuardado) return;
+  if (modoRevision) {
+    showInfo("Estás en modo revisión. No se puede enviar la actividad.");
+    return;
+  }
 
-  const resultado = corregirActividad();
-  mostrarResultado(resultado);
-  mostrarErroresPorPregunta(resultado);
+  if (intentoGuardado) return;
 
   if (!estudianteActual || !estudianteActual.id) {
     showError("No se pudo identificar al estudiante actual.");
     return;
   }
 
+  const respuestasUsuario = obtenerRespuestas();
+
   submitBtn.disabled = true;
+  submitBtn.textContent = "Corrigiendo...";
+
+  let data;
+
+  try {
+    const response = await fetch(window.APP_CONFIG.apiBaseUrl + "/corregir", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        estudianteId: estudianteActual.id,
+        slug: window.APP_CONFIG.activitySlug,
+        respuestas: respuestasUsuario.reduce((acc, r) => {
+          acc[r.numero] = r.respuesta;
+          return acc;
+        }, {}),
+      }),
+    });
+
+    data = await response.json();
+  } catch (error) {
+    showError("Error al conectar con el servidor de corrección.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Enviar actividad";
+    return;
+  }
+
+  if (!data.ok) {
+    showError(data.message || "Error al corregir la actividad.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Enviar actividad";
+    return;
+  }
+
+  const porcentaje = Math.round((data.puntaje / data.total) * 100);
+
+  const juicio =
+    porcentaje >= 76 ? "Logrado" : porcentaje >= 50 ? "En proceso" : "Inicial";
+
+  const claseResultado =
+    porcentaje >= 76 ? "success" : porcentaje >= 50 ? "warning" : "error";
+
+  const devolucion = "Resultado calculado automáticamente.";
+
+  mostrarResultado({
+    puntajeObtenido: data.puntaje,
+    puntajeTotal: data.total,
+    porcentaje,
+    juicio,
+    devolucion,
+    claseResultado,
+  });
+
   submitBtn.textContent = "Guardando...";
 
   const payload = {
     estudiante_id: estudianteActual.id,
     actividad_slug: window.APP_CONFIG.activitySlug,
-    puntaje_obtenido: resultado.puntajeObtenido,
-    puntaje_total: resultado.puntajeTotal,
-    porcentaje: resultado.porcentaje,
-    juicio: resultado.juicio,
-    devolucion: resultado.devolucion,
-    respuestas: resultado.respuestasCorregidas,
+    puntaje_obtenido: data.puntaje,
+    puntaje_total: data.total,
+    porcentaje,
+    juicio,
+    devolucion,
+    respuestas: respuestasUsuario,
   };
 
   const guardado = await ResultsService.guardarIntento(payload);
@@ -390,6 +408,11 @@ loginBtn.addEventListener("click", handleLogin);
 overlayLoginBtn.addEventListener("click", handleLogin);
 
 submitBtn.addEventListener("click", () => {
+  if (modoRevision) {
+    showInfo("Estás en modo revisión. No se puede enviar la actividad.");
+    return;
+  }
+
   const sinResponder = obtenerPreguntasSinResponder();
 
   if (sinResponder.length > 0) {
@@ -408,3 +431,8 @@ confirmSubmitBtn.addEventListener("click", () => {
 });
 
 renderQuestions();
+
+if (modoRevision) {
+  submitBtn.style.display = "none";
+  cargarMejorIntento();
+}
