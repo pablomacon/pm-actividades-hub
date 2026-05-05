@@ -368,3 +368,10 @@ footer small {
 .btn-done:hover {
   background: var(--black);
 }
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}

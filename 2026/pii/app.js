@@ -10,7 +10,7 @@ loginBtn.addEventListener("click", async () => {
   const result = await AuthService.beginGoogleLogin();
 
   if (!result.ok) {
-    alert("Error en login");
+    alert(result.message || "Error en login");
     return;
   }
 
@@ -54,23 +54,63 @@ async function cargarActividades() {
   renderActividades(data.actividades);
 }
 
+function normalizarIntentos(valor) {
+  const numero = Number(valor || 0);
+
+  if (Number.isNaN(numero)) {
+    return 0;
+  }
+
+  return numero;
+}
+
+function renderBotonesActividad(a, intentosRealizados) {
+  const urlActividad = a.url;
+  const urlRevision = `${a.url}?modo=revision`;
+
+  if (intentosRealizados === 0) {
+    return `
+      <a href="${urlActividad}" class="btn">Entrar</a>
+    `;
+  }
+
+  if (intentosRealizados === 1) {
+    return `
+      <div class="button-row">
+        <a href="${urlActividad}" class="btn">Realizar segundo intento</a>
+        <a href="${urlRevision}" class="btn btn-done">Ver mejor intento</a>
+      </div>
+    `;
+  }
+
+  return `
+    <a href="${urlRevision}" class="btn btn-done">Ver mejor intento</a>
+  `;
+}
+
 function renderActividades(actividades) {
   contenedor.innerHTML = actividades
     .map((a) => {
-      const realizada = a.intentos_realizados > 0;
+      const intentosRealizados = normalizarIntentos(a.intentos_realizados);
+      const realizada = intentosRealizados > 0;
+      const agotada = intentosRealizados >= 2;
 
-      const badge = realizada
-        ? `<p><strong>Estado:</strong> Realizada</p>`
-        : `<p><strong>Estado:</strong> Pendiente</p>`;
+      const estadoTexto = !realizada
+        ? "Pendiente"
+        : agotada
+          ? "Realizada"
+          : "Realizada: queda un intento disponible";
+
+      const badge = `<p><strong>Estado:</strong> ${estadoTexto}</p>`;
 
       const info = realizada
-        ? `<p><strong>Mejor:</strong> ${a.mejor_porcentaje}%</p>
-           <p><strong>Intentos:</strong> ${a.intentos_realizados}</p>`
-        : "";
+        ? `
+          <p><strong>Mejor:</strong> ${a.mejor_porcentaje}%</p>
+          <p><strong>Intentos:</strong> ${intentosRealizados} de 2</p>
+        `
+        : `<p><strong>Intentos:</strong> 0 de 2</p>`;
 
-      const botonTexto = realizada ? "Ver mejor intento" : "Entrar";
-      const botonClase = realizada ? "btn btn-done" : "btn";
-      const url = realizada ? `${a.url}?modo=revision` : a.url;
+      const botones = renderBotonesActividad(a, intentosRealizados);
 
       return `
         <article class="card ${realizada ? "card-realizada" : "card-pendiente"}">
@@ -78,7 +118,7 @@ function renderActividades(actividades) {
           <p>${a.descripcion || ""}</p>
           ${badge}
           ${info}
-          <a href="${url}" class="${botonClase}">${botonTexto}</a>
+          ${botones}
         </article>
       `;
     })
