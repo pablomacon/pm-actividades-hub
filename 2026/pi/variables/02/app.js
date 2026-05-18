@@ -1,5 +1,6 @@
-const loginBtn = document.getElementById("loginBtn");
-const overlayLoginBtn = document.getElementById("overlayLoginBtn");
+const googleButton = document.getElementById("googleButton");
+const overlayGoogleButton = document.getElementById("overlayGoogleButton");
+
 const loginStatus = document.getElementById("loginStatus");
 const overlayStatus = document.getElementById("overlayStatus");
 const activityBadge = document.getElementById("activityBadge");
@@ -22,26 +23,49 @@ const modoRevision = params.get("modo") === "revision";
 function renderQuestions() {
   questionsContainer.innerHTML = QUIZ_DATA.preguntas
     .map((pregunta) => {
-      const opcionesHtml = pregunta.opciones
-        .map((opcion) => {
-          const inputType = pregunta.tipo === "checkbox" ? "checkbox" : "radio";
+      let contenidoPregunta = "";
 
-          return `
-            <label class="option">
-              <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
-              ${opcion.texto}
-            </label>
-          `;
-        })
-        .join("");
+      if (pregunta.tipo === "radio" || pregunta.tipo === "checkbox") {
+        const opcionesHtml = (pregunta.opciones || [])
+          .map((opcion) => {
+            const inputType =
+              pregunta.tipo === "checkbox" ? "checkbox" : "radio";
+
+            return `
+              <label class="option">
+                <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
+                ${opcion.texto}
+              </label>
+            `;
+          })
+          .join("");
+
+        contenidoPregunta = `
+          <div class="option-list">
+            ${opcionesHtml}
+          </div>
+        `;
+      }
+
+      if (pregunta.tipo === "text") {
+        contenidoPregunta = `
+          <div class="option-list">
+            <input
+              type="text"
+              class="text-answer"
+              id="q${pregunta.numero}"
+              name="q${pregunta.numero}"
+              placeholder="${pregunta.placeholder || "Escribí tu respuesta acá"}"
+            />
+          </div>
+        `;
+      }
 
       return `
         <section class="question-card" id="question-${pregunta.numero}">
           <div class="question-number">${pregunta.numero}</div>
-          <h3 class="question-title">${pregunta.enunciado}</h3>
-          <div class="option-list">
-            ${opcionesHtml}
-          </div>
+          <h3 class="question-title">${String(pregunta.enunciado).replace(/\n/g, "<br>")}</h3>
+          ${contenidoPregunta}
           <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
         </section>
       `;
@@ -50,6 +74,8 @@ function renderQuestions() {
 }
 
 function setStatus(element, type, message) {
+  if (!element) return;
+
   element.className = `status-box ${type}`;
   element.textContent = message;
 }
@@ -64,11 +90,24 @@ function unlockActivity(message = "Acceso habilitado.") {
     activityBadge.classList.add("badge-enabled");
   }
 
-  loginBtn.disabled = true;
-  overlayLoginBtn.disabled = true;
+  if (googleButton) googleButton.style.display = "none";
+  if (overlayGoogleButton) overlayGoogleButton.style.display = "none";
+}
 
-  loginBtn.textContent = "Ingresado";
-  overlayLoginBtn.textContent = "Ingresado";
+function unlockRevisionMode(message = "Modo revisión habilitado.") {
+  document.body.classList.add("authorized");
+  setStatus(loginStatus, "success", message);
+  setStatus(overlayStatus, "success", message);
+
+  if (activityBadge) {
+    activityBadge.textContent = "Modo revisión";
+    activityBadge.classList.add("badge-enabled");
+  }
+
+  if (googleButton) googleButton.style.display = "none";
+  if (overlayGoogleButton) overlayGoogleButton.style.display = "none";
+
+  submitBtn.style.display = "none";
 }
 
 function showInfo(message) {
@@ -81,18 +120,36 @@ function showError(message) {
   setStatus(overlayStatus, "error", message);
 }
 
-async function handleLogin() {
-  showInfo("Iniciando sesión con Google...");
+function iniciarLoginGoogle() {
+  showInfo("Esperando inicio de sesión con Google.");
 
-  const loginResult = await AuthService.beginGoogleLogin();
+  AuthService.initGoogleLogin({
+    onSuccess: async ({ idToken }) => {
+      sessionStorage.setItem("pm_id_token", idToken);
+      showInfo("Inicio de sesión correcto. Validando acceso...");
 
-  if (!loginResult.ok) {
-    showError(loginResult.message || "No se pudo iniciar la autenticación.");
+      await procesarLoginConToken(idToken);
+    },
+
+    onError: ({ message }) => {
+      showError(message || "No se pudo iniciar sesión con Google.");
+    },
+  });
+}
+
+async function procesarLoginConToken(idToken) {
+  if (!idToken) {
+    showInfo("Para acceder, iniciá sesión con Google.");
+    return;
+  }
+
+  if (modoRevision) {
+    await cargarMejorIntento();
     return;
   }
 
   const validation = await AuthService.validateAccess({
-    idToken: loginResult.idToken,
+    idToken,
     slug: window.APP_CONFIG.activitySlug,
   });
 
@@ -104,9 +161,14 @@ async function handleLogin() {
       `Bienvenido/a, ${estudiante.nombre} ${estudiante.apellido}. Acceso autorizado para ${estudiante.titulo}.`,
     );
   } else {
+    sessionStorage.removeItem("pm_id_token");
+
     showError(
       validation.message || "Tu cuenta no está habilitada para esta actividad.",
     );
+
+    if (googleButton) googleButton.style.display = "block";
+    if (overlayGoogleButton) overlayGoogleButton.style.display = "block";
   }
 }
 
@@ -134,6 +196,15 @@ function obtenerRespuestas() {
       };
     }
 
+    if (pregunta.tipo === "text") {
+      const input = document.getElementById(`q${pregunta.numero}`);
+
+      return {
+        numero: pregunta.numero,
+        respuesta: input ? input.value.trim() : "",
+      };
+    }
+
     return {
       numero: pregunta.numero,
       respuesta: null,
@@ -157,6 +228,11 @@ function obtenerPreguntasSinResponder() {
       );
 
       return marcadas.length === 0;
+    }
+
+    if (pregunta.tipo === "text") {
+      const input = document.getElementById(`q${pregunta.numero}`);
+      return !input || input.value.trim() === "";
     }
 
     return true;
@@ -201,6 +277,11 @@ function aplicarRevision(respuestas) {
     inputs.forEach((input) => {
       input.disabled = true;
 
+      if (input.type === "text") {
+        input.value = respuesta.respuesta_dada || "";
+        return;
+      }
+
       if (respuestaIncluyeValor(respuesta.respuesta_dada, input.value)) {
         input.checked = true;
       }
@@ -211,7 +292,12 @@ function aplicarRevision(respuestas) {
       feedback.textContent = "Correcta.";
     } else {
       preguntaCard.classList.add("question-incorrect");
-      feedback.textContent = "Incorrecta.";
+
+      if (respuesta.respuesta_correcta) {
+        feedback.textContent = `Incorrecta. Respuesta esperada: ${respuesta.respuesta_correcta}`;
+      } else {
+        feedback.textContent = "Incorrecta.";
+      }
     }
   });
 }
@@ -220,12 +306,12 @@ async function cargarMejorIntento() {
   const idToken = sessionStorage.getItem("pm_id_token");
 
   if (!idToken) {
-    showError(
-      "Para ver el intento necesitás ingresar desde el hub de actividades.",
-    );
+    submitBtn.style.display = "none";
+    showInfo("Para ver el mejor intento, ingresá con Google.");
     return;
   }
 
+  submitBtn.style.display = "none";
   showInfo("Cargando mejor intento...");
 
   try {
@@ -250,14 +336,15 @@ async function cargarMejorIntento() {
       return;
     }
 
-    document.body.classList.add("authorized");
+    unlockRevisionMode("Mostrando el mejor intento registrado.");
 
-    if (activityBadge) {
-      activityBadge.textContent = "Modo revisión";
-      activityBadge.classList.add("badge-enabled");
+    if (Array.isArray(data.respuestas) && data.respuestas.length > 0) {
+      aplicarRevision(data.respuestas);
+    } else {
+      showInfo(
+        "Se encontró el intento, pero no hay respuestas individuales guardadas para mostrar la revisión por pregunta.",
+      );
     }
-
-    aplicarRevision(data.respuestas);
 
     const porcentaje = Math.round(Number(data.intento.porcentaje));
 
@@ -272,12 +359,6 @@ async function cargarMejorIntento() {
       devolucion: data.intento.devolucion,
       claseResultado,
     });
-
-    submitBtn.style.display = "none";
-    loginBtn.disabled = true;
-    overlayLoginBtn.disabled = true;
-    loginBtn.textContent = "Modo revisión";
-    overlayLoginBtn.textContent = "Modo revisión";
   } catch (error) {
     console.error(error);
     showError("Error al conectar con el servidor para cargar el intento.");
@@ -294,6 +375,11 @@ function cerrarConfirmacionIncompleta() {
 }
 
 async function procesarEnvioActividad() {
+  if (modoRevision) {
+    showInfo("Estás en modo revisión. No se puede enviar la actividad.");
+    return;
+  }
+
   if (intentoGuardado) return;
 
   if (!estudianteActual || !estudianteActual.id) {
@@ -326,6 +412,7 @@ async function procesarEnvioActividad() {
 
     data = await response.json();
   } catch (error) {
+    console.error(error);
     showError("Error al conectar con el servidor de corrección.");
     submitBtn.disabled = false;
     submitBtn.textContent = "Enviar actividad";
@@ -384,10 +471,12 @@ async function procesarEnvioActividad() {
   }
 }
 
-loginBtn.addEventListener("click", handleLogin);
-overlayLoginBtn.addEventListener("click", handleLogin);
-
 submitBtn.addEventListener("click", () => {
+  if (modoRevision) {
+    showInfo("Estás en modo revisión. No se puede enviar la actividad.");
+    return;
+  }
+
   const sinResponder = obtenerPreguntasSinResponder();
 
   if (sinResponder.length > 0) {
@@ -407,6 +496,16 @@ confirmSubmitBtn.addEventListener("click", () => {
 
 renderQuestions();
 
+window.addEventListener("load", () => {
+  iniciarLoginGoogle();
+
+  const idTokenGuardado = sessionStorage.getItem("pm_id_token");
+
+  if (idTokenGuardado) {
+    procesarLoginConToken(idTokenGuardado);
+  }
+});
+
 if (modoRevision) {
-  cargarMejorIntento();
+  submitBtn.style.display = "none";
 }
