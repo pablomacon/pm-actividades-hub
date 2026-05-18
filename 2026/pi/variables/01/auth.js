@@ -1,44 +1,48 @@
 const AuthService = {
-  beginGoogleLogin() {
-    return new Promise((resolve) => {
-      if (
-        !window.google ||
-        !window.google.accounts ||
-        !window.google.accounts.id
-      ) {
-        resolve({
-          ok: false,
-          message: "Google Identity Services no cargó correctamente.",
-        });
-        return;
-      }
-
-      window.google.accounts.id.initialize({
-        client_id: window.APP_CONFIG.googleClientId,
-        callback: (response) => {
-          if (!response || !response.credential) {
-            resolve({
-              ok: false,
-              message: "No se recibió credencial de Google.",
-            });
-            return;
-          }
-
-          resolve({
-            ok: true,
-            idToken: response.credential,
-          });
-        },
+  initGoogleLogin({ onSuccess, onError }) {
+    if (
+      !window.google ||
+      !window.google.accounts ||
+      !window.google.accounts.id
+    ) {
+      onError({
+        message: "Google Identity Services no cargó correctamente.",
       });
+      return;
+    }
 
-      window.google.accounts.id.prompt((notification) => {
-        // Si querés, después podemos afinar mensajes según el estado del prompt
-        if (notification.isNotDisplayed && notification.isNotDisplayed()) {
-          resolve({
-            ok: false,
-            message: "No se pudo mostrar el inicio de sesión de Google.",
+    window.google.accounts.id.initialize({
+      client_id: window.APP_CONFIG.googleClientId,
+      callback: (response) => {
+        if (!response || !response.credential) {
+          onError({
+            message: "No se recibió credencial de Google.",
           });
+          return;
         }
+
+        onSuccess({
+          idToken: response.credential,
+        });
+      },
+    });
+
+    const buttonIds = ["googleButton", "overlayGoogleButton"];
+
+    buttonIds.forEach((id) => {
+      const container = document.getElementById(id);
+
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      window.google.accounts.id.renderButton(container, {
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        shape: "pill",
+        width: 260,
+        locale: "es",
       });
     });
   },

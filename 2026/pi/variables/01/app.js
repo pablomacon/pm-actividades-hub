@@ -1,5 +1,6 @@
-const loginBtn = document.getElementById("loginBtn");
-const overlayLoginBtn = document.getElementById("overlayLoginBtn");
+const googleButton = document.getElementById("googleButton");
+const overlayGoogleButton = document.getElementById("overlayGoogleButton");
+
 const loginStatus = document.getElementById("loginStatus");
 const overlayStatus = document.getElementById("overlayStatus");
 const activityBadge = document.getElementById("activityBadge");
@@ -73,6 +74,8 @@ function renderQuestions() {
 }
 
 function setStatus(element, type, message) {
+  if (!element) return;
+
   element.className = `status-box ${type}`;
   element.textContent = message;
 }
@@ -87,11 +90,8 @@ function unlockActivity(message = "Acceso habilitado.") {
     activityBadge.classList.add("badge-enabled");
   }
 
-  loginBtn.disabled = true;
-  overlayLoginBtn.disabled = true;
-
-  loginBtn.textContent = "Ingresado";
-  overlayLoginBtn.textContent = "Ingresado";
+  if (googleButton) googleButton.style.display = "none";
+  if (overlayGoogleButton) overlayGoogleButton.style.display = "none";
 }
 
 function unlockRevisionMode(message = "Modo revisión habilitado.") {
@@ -104,11 +104,8 @@ function unlockRevisionMode(message = "Modo revisión habilitado.") {
     activityBadge.classList.add("badge-enabled");
   }
 
-  loginBtn.disabled = true;
-  overlayLoginBtn.disabled = true;
-
-  loginBtn.textContent = "Modo revisión";
-  overlayLoginBtn.textContent = "Modo revisión";
+  if (googleButton) googleButton.style.display = "none";
+  if (overlayGoogleButton) overlayGoogleButton.style.display = "none";
 
   submitBtn.style.display = "none";
 }
@@ -123,17 +120,28 @@ function showError(message) {
   setStatus(overlayStatus, "error", message);
 }
 
-async function handleLogin() {
-  showInfo("Iniciando sesión con Google...");
+function iniciarLoginGoogle() {
+  showInfo("Esperando inicio de sesión con Google.");
 
-  const loginResult = await AuthService.beginGoogleLogin();
+  AuthService.initGoogleLogin({
+    onSuccess: async ({ idToken }) => {
+      sessionStorage.setItem("pm_id_token", idToken);
+      showInfo("Inicio de sesión correcto. Validando acceso...");
 
-  if (!loginResult.ok) {
-    showError(loginResult.message || "No se pudo iniciar la autenticación.");
+      await procesarLoginConToken(idToken);
+    },
+
+    onError: ({ message }) => {
+      showError(message || "No se pudo iniciar sesión con Google.");
+    },
+  });
+}
+
+async function procesarLoginConToken(idToken) {
+  if (!idToken) {
+    showInfo("Para acceder, iniciá sesión con Google.");
     return;
   }
-
-  sessionStorage.setItem("pm_id_token", loginResult.idToken);
 
   if (modoRevision) {
     await cargarMejorIntento();
@@ -141,7 +149,7 @@ async function handleLogin() {
   }
 
   const validation = await AuthService.validateAccess({
-    idToken: loginResult.idToken,
+    idToken,
     slug: window.APP_CONFIG.activitySlug,
   });
 
@@ -153,9 +161,14 @@ async function handleLogin() {
       `Bienvenido/a, ${estudiante.nombre} ${estudiante.apellido}. Acceso autorizado para ${estudiante.titulo}.`,
     );
   } else {
+    sessionStorage.removeItem("pm_id_token");
+
     showError(
       validation.message || "Tu cuenta no está habilitada para esta actividad.",
     );
+
+    if (googleButton) googleButton.style.display = "block";
+    if (overlayGoogleButton) overlayGoogleButton.style.display = "block";
   }
 }
 
@@ -399,6 +412,7 @@ async function procesarEnvioActividad() {
 
     data = await response.json();
   } catch (error) {
+    console.error(error);
     showError("Error al conectar con el servidor de corrección.");
     submitBtn.disabled = false;
     submitBtn.textContent = "Enviar actividad";
@@ -457,9 +471,6 @@ async function procesarEnvioActividad() {
   }
 }
 
-loginBtn.addEventListener("click", handleLogin);
-overlayLoginBtn.addEventListener("click", handleLogin);
-
 submitBtn.addEventListener("click", () => {
   if (modoRevision) {
     showInfo("Estás en modo revisión. No se puede enviar la actividad.");
@@ -485,7 +496,16 @@ confirmSubmitBtn.addEventListener("click", () => {
 
 renderQuestions();
 
+window.addEventListener("load", () => {
+  iniciarLoginGoogle();
+
+  const idTokenGuardado = sessionStorage.getItem("pm_id_token");
+
+  if (idTokenGuardado) {
+    procesarLoginConToken(idTokenGuardado);
+  }
+});
+
 if (modoRevision) {
   submitBtn.style.display = "none";
-  cargarMejorIntento();
 }
