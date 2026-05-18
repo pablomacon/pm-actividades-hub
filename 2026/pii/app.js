@@ -1,57 +1,77 @@
 const API = "https://backend-ejercicios-pm.vercel.app/api";
 
-const loginBtn = document.getElementById("loginBtn");
 const loginBox = document.getElementById("loginBox");
 const contenedor = document.getElementById("actividadesContainer");
+const loginStatus = document.getElementById("loginStatus");
 
 let idToken = sessionStorage.getItem("pm_id_token");
 
-loginBtn.addEventListener("click", async () => {
-  const result = await AuthService.beginGoogleLogin();
-
-  if (!result.ok) {
-    alert(result.message || "Error en login");
-    return;
+function mostrarMensajeLogin(mensaje) {
+  if (loginStatus) {
+    loginStatus.textContent = mensaje || "";
   }
+}
 
-  idToken = result.idToken;
-  sessionStorage.setItem("pm_id_token", idToken);
+function iniciarLoginGoogle() {
+  AuthService.initGoogleLogin({
+    onSuccess: ({ idToken: token }) => {
+      idToken = token;
+      sessionStorage.setItem("pm_id_token", idToken);
+      mostrarMensajeLogin("Inicio de sesión correcto. Cargando actividades...");
+      cargarActividades();
+    },
 
-  cargarActividades();
-});
+    onError: ({ message }) => {
+      mostrarMensajeLogin(message || "No se pudo iniciar sesión con Google.");
+    },
+  });
+}
 
 if (idToken) {
   cargarActividades();
+} else {
+  window.addEventListener("load", iniciarLoginGoogle);
 }
 
 async function cargarActividades() {
-  const res = await fetch(`${API}/actividades/estudiante`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      idToken,
-      anio: 2026,
-      asignatura: "pii",
-    }),
-  });
+  try {
+    const res = await fetch(`${API}/actividades/estudiante`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idToken,
+        anio: 2026,
+        asignatura: "pii",
+      }),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!data.ok) {
+    if (!data.ok) {
+      sessionStorage.removeItem("pm_id_token");
+      idToken = null;
+      loginBox.style.display = "block";
+      contenedor.style.display = "none";
+      mostrarMensajeLogin(data.message || "No se pudo validar el acceso.");
+      iniciarLoginGoogle();
+      return;
+    }
+
+    loginBox.style.display = "none";
+    contenedor.style.display = "grid";
+
+    renderActividades(data.actividades);
+  } catch (error) {
+    console.error(error);
     sessionStorage.removeItem("pm_id_token");
     idToken = null;
     loginBox.style.display = "block";
     contenedor.style.display = "none";
-    alert(data.message);
-    return;
+    mostrarMensajeLogin("Error al conectar con el servidor.");
+    iniciarLoginGoogle();
   }
-
-  loginBox.style.display = "none";
-  contenedor.style.display = "grid";
-
-  renderActividades(data.actividades);
 }
 
 function normalizarIntentos(valor) {
