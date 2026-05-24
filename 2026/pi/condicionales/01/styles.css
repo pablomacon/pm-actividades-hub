@@ -275,18 +275,26 @@ body {
 }
 
 .option {
-  display: flex;
+  display: grid;
+  grid-template-columns: 20px 1fr;
   align-items: center;
-  gap: 10px;
+  column-gap: 12px;
   padding: 12px 14px;
   border-radius: 14px;
   background: var(--pm-light);
   color: var(--pm-black);
   border: 1px solid transparent;
+  line-height: 1.35;
+  white-space: pre-line;
 }
 
 .option input {
   accent-color: var(--pm-teal);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  justify-self: center;
+  align-self: center;
 }
 
 .question-feedback {
@@ -546,6 +554,3 @@ body.authorized .activity-overlay {
   font-size: inherit;
 }
 
-.option {
-  white-space: pre-line;
-}
