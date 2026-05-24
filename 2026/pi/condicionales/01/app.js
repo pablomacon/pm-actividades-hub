@@ -174,13 +174,19 @@ async function procesarLoginConToken(idToken) {
 
 function obtenerRespuestas() {
   return QUIZ_DATA.preguntas.map((pregunta) => {
+    const datosPregunta = {
+      numero: pregunta.numero,
+      tipo: pregunta.tipo,
+      enunciado: pregunta.enunciado || "",
+    };
+
     if (pregunta.tipo === "radio") {
       const seleccionada = document.querySelector(
         `input[name="q${pregunta.numero}"]:checked`,
       );
 
       return {
-        numero: pregunta.numero,
+        ...datosPregunta,
         respuesta: seleccionada ? seleccionada.value : null,
       };
     }
@@ -191,7 +197,7 @@ function obtenerRespuestas() {
       ).map((input) => input.value);
 
       return {
-        numero: pregunta.numero,
+        ...datosPregunta,
         respuesta: marcadas,
       };
     }
@@ -200,13 +206,13 @@ function obtenerRespuestas() {
       const input = document.getElementById(`q${pregunta.numero}`);
 
       return {
-        numero: pregunta.numero,
+        ...datosPregunta,
         respuesta: input ? input.value.trim() : "",
       };
     }
 
     return {
-      numero: pregunta.numero,
+      ...datosPregunta,
       respuesta: null,
     };
   });
