@@ -1,3 +1,4 @@
+/* styles.css de la actividad */
 :root {
   --pm-white: #ffffff;
   --pm-light: #f4f2f5;
@@ -553,4 +554,3 @@ body.authorized .activity-overlay {
   font-family: inherit;
   font-size: inherit;
 }
-

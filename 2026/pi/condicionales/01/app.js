@@ -86,9 +86,9 @@ function renderQuestions() {
               pregunta.tipo === "checkbox" ? "checkbox" : "radio";
 
             return `
-              <label class="option">
-                <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
-                ${opcion.texto}
+            <label class="option">
+              <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
+              <span class="option-text">${String(opcion.texto).replace(/\n/g, "<br>")}</span>
               </label>
             `;
           })
