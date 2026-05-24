@@ -20,6 +20,60 @@ let intentoGuardado = false;
 const params = new URLSearchParams(window.location.search);
 const modoRevision = params.get("modo") === "revision";
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatearEnunciado(enunciado) {
+  const texto = String(enunciado || "");
+  const lineas = texto.split("\n");
+
+  const indiceInicioCodigo = lineas.findIndex((linea) => {
+    const limpia = linea.trim();
+
+    return (
+      limpia.startsWith("int ") ||
+      limpia.startsWith("double ") ||
+      limpia.startsWith("float ") ||
+      limpia.startsWith("String ") ||
+      limpia.startsWith("boolean ") ||
+      limpia.startsWith("char ") ||
+      limpia.startsWith("if ") ||
+      limpia.startsWith("if (") ||
+      limpia.startsWith("else") ||
+      limpia.startsWith("for ") ||
+      limpia.startsWith("while ") ||
+      limpia.startsWith("switch ") ||
+      limpia.startsWith("System.out.") ||
+      limpia.startsWith("}")
+    );
+  });
+
+  if (indiceInicioCodigo === -1) {
+    return `
+      <div class="question-text">
+        ${escapeHtml(texto).replace(/\n/g, "<br>")}
+      </div>
+    `;
+  }
+
+  const consigna = lineas.slice(0, indiceInicioCodigo).join("\n").trim();
+  const codigo = lineas.slice(indiceInicioCodigo).join("\n").trim();
+
+  return `
+    <div class="question-text">
+      ${escapeHtml(consigna).replace(/\n/g, "<br>")}
+    </div>
+
+    <pre class="code-block"><code>${escapeHtml(codigo)}</code></pre>
+  `;
+}
+
 function renderQuestions() {
   questionsContainer.innerHTML = QUIZ_DATA.preguntas
     .map((pregunta) => {
@@ -64,7 +118,9 @@ function renderQuestions() {
       return `
         <section class="question-card" id="question-${pregunta.numero}">
           <div class="question-number">${pregunta.numero}</div>
-          <h3 class="question-title">${String(pregunta.enunciado).replace(/\n/g, "<br>")}</h3>
+          <div class="question-title">
+            ${formatearEnunciado(pregunta.enunciado)}
+          </div>
           ${contenidoPregunta}
           <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
         </section>
