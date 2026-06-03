@@ -29,18 +29,6 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function obtenerPreguntasActividad() {
-  if (Array.isArray(QUIZ_DATA.preguntas)) {
-    return QUIZ_DATA.preguntas;
-  }
-
-  if (Array.isArray(QUIZ_DATA.bloques)) {
-    return QUIZ_DATA.bloques.flatMap((bloque) => bloque.preguntas || []);
-  }
-
-  return [];
-}
-
 function formatearEnunciado(enunciado) {
   const texto = String(enunciado || "");
   const lineas = texto.split("\n");
@@ -49,10 +37,6 @@ function formatearEnunciado(enunciado) {
     const limpia = linea.trim();
 
     return (
-      limpia.startsWith("import ") ||
-      limpia.startsWith("public class ") ||
-      limpia.startsWith("public static ") ||
-      limpia.startsWith("Scanner ") ||
       limpia.startsWith("int ") ||
       limpia.startsWith("double ") ||
       limpia.startsWith("float ") ||
@@ -90,88 +74,59 @@ function formatearEnunciado(enunciado) {
   `;
 }
 
-function renderContenidoPregunta(pregunta) {
-  if (pregunta.tipo === "radio" || pregunta.tipo === "checkbox") {
-    const opcionesHtml = (pregunta.opciones || [])
-      .map((opcion) => {
-        const inputType = pregunta.tipo === "checkbox" ? "checkbox" : "radio";
+function renderQuestions() {
+  questionsContainer.innerHTML = QUIZ_DATA.preguntas
+    .map((pregunta) => {
+      let contenidoPregunta = "";
 
-        return `
-          <label class="option">
-            <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
-            <span class="option-text">${escapeHtml(opcion.texto).replace(/\n/g, "<br>")}</span>
-          </label>
+      if (pregunta.tipo === "radio" || pregunta.tipo === "checkbox") {
+        const opcionesHtml = (pregunta.opciones || [])
+          .map((opcion) => {
+            const inputType =
+              pregunta.tipo === "checkbox" ? "checkbox" : "radio";
+
+            return `
+            <label class="option">
+              <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
+              <span class="option-text">${String(opcion.texto).replace(/\n/g, "<br>")}</span>
+              </label>
+            `;
+          })
+          .join("");
+
+        contenidoPregunta = `
+          <div class="option-list">
+            ${opcionesHtml}
+          </div>
         `;
-      })
-      .join("");
+      }
 
-    return `
-      <div class="option-list">
-        ${opcionesHtml}
-      </div>
-    `;
-  }
-
-  if (pregunta.tipo === "text") {
-    return `
-      <div class="option-list">
-        <input
-          type="text"
-          class="text-answer"
-          id="q${pregunta.numero}"
-          name="q${pregunta.numero}"
-          placeholder="${escapeHtml(pregunta.placeholder || "Escribí tu respuesta acá")}" />
-      </div>
-    `;
-  }
-
-  return "";
-}
-
-function renderQuestionCard(pregunta) {
-  return `
-    <section class="question-card" id="question-${pregunta.numero}">
-      <div class="question-number">${pregunta.numero}</div>
-      <div class="question-title">
-        ${formatearEnunciado(pregunta.enunciado)}
-      </div>
-      ${renderContenidoPregunta(pregunta)}
-      <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
-    </section>
-  `;
-}
-
-function renderBloquesCodigo() {
-  questionsContainer.classList.add("block-mode");
-
-  questionsContainer.innerHTML = QUIZ_DATA.bloques
-    .map((bloque, index) => {
-      const preguntasHtml = (bloque.preguntas || []).map(renderQuestionCard).join("");
+      if (pregunta.tipo === "text") {
+        contenidoPregunta = `
+          <div class="option-list">
+            <input
+              type="text"
+              class="text-answer"
+              id="q${pregunta.numero}"
+              name="q${pregunta.numero}"
+              placeholder="${pregunta.placeholder || "Escribí tu respuesta acá"}"
+            />
+          </div>
+        `;
+      }
 
       return `
-        <section class="code-group-card" id="${escapeHtml(bloque.id || `bloque-${index + 1}`)}">
-          <div class="code-group-header">
-            <div class="code-group-kicker">${escapeHtml(bloque.lenguaje || "Código")}</div>
-            <h3>${escapeHtml(bloque.titulo || `Bloque ${index + 1}`)}</h3>
+        <section class="question-card" id="question-${pregunta.numero}">
+          <div class="question-number">${pregunta.numero}</div>
+          <div class="question-title">
+            ${formatearEnunciado(pregunta.enunciado)}
           </div>
-          <pre class="code-block shared-code"><code>${escapeHtml(bloque.codigo || "")}</code></pre>
-          <div class="block-questions">
-            ${preguntasHtml}
-          </div>
+          ${contenidoPregunta}
+          <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
         </section>
       `;
     })
     .join("");
-}
-
-function renderQuestions() {
-  if (QUIZ_DATA.modo === "bloques_codigo" && Array.isArray(QUIZ_DATA.bloques)) {
-    renderBloquesCodigo();
-    return;
-  }
-
-  questionsContainer.classList.remove("block-mode");
-  questionsContainer.innerHTML = obtenerPreguntasActividad().map(renderQuestionCard).join("");
 }
 
 function setStatus(element, type, message) {
@@ -187,7 +142,7 @@ function unlockActivity(message = "Acceso habilitado.") {
   setStatus(overlayStatus, "success", message);
 
   if (activityBadge) {
-    activityBadge.textContent = "Evaluación habilitada";
+    activityBadge.textContent = "Actividad habilitada";
     activityBadge.classList.add("badge-enabled");
   }
 
@@ -265,7 +220,7 @@ async function procesarLoginConToken(idToken) {
     sessionStorage.removeItem("pm_id_token");
 
     showError(
-      validation.message || "Tu cuenta no está habilitada para esta evaluación.",
+      validation.message || "Tu cuenta no está habilitada para esta actividad.",
     );
 
     if (googleButton) googleButton.style.display = "block";
@@ -274,7 +229,7 @@ async function procesarLoginConToken(idToken) {
 }
 
 function obtenerRespuestas() {
-  return obtenerPreguntasActividad().map((pregunta) => {
+  return QUIZ_DATA.preguntas.map((pregunta) => {
     const datosPregunta = {
       numero: pregunta.numero,
       tipo: pregunta.tipo,
@@ -320,7 +275,7 @@ function obtenerRespuestas() {
 }
 
 function obtenerPreguntasSinResponder() {
-  return obtenerPreguntasActividad().filter((pregunta) => {
+  return QUIZ_DATA.preguntas.filter((pregunta) => {
     if (pregunta.tipo === "radio") {
       const seleccionada = document.querySelector(
         `input[name="q${pregunta.numero}"]:checked`,
@@ -483,7 +438,7 @@ function cerrarConfirmacionIncompleta() {
 
 async function procesarEnvioActividad() {
   if (modoRevision) {
-    showInfo("Estás en modo revisión. No se puede enviar la evaluación.");
+    showInfo("Estás en modo revisión. No se puede enviar la actividad.");
     return;
   }
 
@@ -522,14 +477,14 @@ async function procesarEnvioActividad() {
     console.error(error);
     showError("Error al conectar con el servidor de corrección.");
     submitBtn.disabled = false;
-    submitBtn.textContent = "Enviar evaluación";
+    submitBtn.textContent = "Enviar actividad";
     return;
   }
 
   if (!data.ok) {
-    showError(data.message || "Error al corregir la evaluación.");
+    showError(data.message || "Error al corregir la actividad.");
     submitBtn.disabled = false;
-    submitBtn.textContent = "Enviar evaluación";
+    submitBtn.textContent = "Enviar actividad";
     return;
   }
 
@@ -571,16 +526,26 @@ async function procesarEnvioActividad() {
     intentoGuardado = true;
     resultBox.innerHTML += `<br><strong>Intento guardado:</strong> ${guardado.numero_intento}`;
     submitBtn.textContent = "Intento enviado";
+    submitBtn.style.display = "none";
+
+    // Después de guardar, cargamos la revisión del intento para marcar
+    // visualmente qué preguntas fueron correctas e incorrectas.
+    //
+    // El backend ya guarda el detalle en respuestas_intento y el modo revisión
+    // ya sabe pintarlo con aplicarRevision().
+    // Para evaluaciones con un solo intento, el mejor intento coincide con
+    // el intento recién enviado.
+    await cargarMejorIntento();
   } else {
     resultBox.innerHTML += `<br><strong>Error al guardar:</strong> ${guardado.message}`;
     submitBtn.disabled = false;
-    submitBtn.textContent = "Enviar evaluación";
+    submitBtn.textContent = "Enviar actividad";
   }
 }
 
 submitBtn.addEventListener("click", () => {
   if (modoRevision) {
-    showInfo("Estás en modo revisión. No se puede enviar la evaluación.");
+    showInfo("Estás en modo revisión. No se puede enviar la actividad.");
     return;
   }
 
