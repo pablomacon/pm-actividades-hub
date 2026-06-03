@@ -74,61 +74,103 @@ function formatearEnunciado(enunciado) {
   `;
 }
 
-function renderQuestions() {
-  questionsContainer.innerHTML = QUIZ_DATA.preguntas
-    .map((pregunta) => {
-      let contenidoPregunta = "";
+function renderizarContenidoPregunta(pregunta) {
+  let contenidoPregunta = "";
 
-      if (pregunta.tipo === "radio" || pregunta.tipo === "checkbox") {
-        const opcionesHtml = (pregunta.opciones || [])
-          .map((opcion) => {
-            const inputType =
-              pregunta.tipo === "checkbox" ? "checkbox" : "radio";
+  if (pregunta.tipo === "radio" || pregunta.tipo === "checkbox") {
+    const opcionesHtml = (pregunta.opciones || [])
+      .map((opcion) => {
+        const inputType = pregunta.tipo === "checkbox" ? "checkbox" : "radio";
 
-            return `
-            <label class="option">
-              <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
-              <span class="option-text">${String(opcion.texto).replace(/\n/g, "<br>")}</span>
-              </label>
-            `;
-          })
-          .join("");
-
-        contenidoPregunta = `
-          <div class="option-list">
-            ${opcionesHtml}
-          </div>
+        return `
+          <label class="option">
+            <input type="${inputType}" name="q${pregunta.numero}" value="${opcion.valor}" />
+            <span class="option-text">${String(opcion.texto).replace(/\n/g, "<br>")}</span>
+          </label>
         `;
-      }
+      })
+      .join("");
 
-      if (pregunta.tipo === "text") {
-        contenidoPregunta = `
-          <div class="option-list">
-            <input
-              type="text"
-              class="text-answer"
-              id="q${pregunta.numero}"
-              name="q${pregunta.numero}"
-              placeholder="${pregunta.placeholder || "Escribí tu respuesta acá"}"
-            />
-          </div>
-        `;
-      }
+    contenidoPregunta = `
+      <div class="option-list">
+        ${opcionesHtml}
+      </div>
+    `;
+  }
 
-      return `
-        <section class="question-card" id="question-${pregunta.numero}">
-          <div class="question-number">${pregunta.numero}</div>
-          <div class="question-title">
-            ${formatearEnunciado(pregunta.enunciado)}
-          </div>
-          ${contenidoPregunta}
-          <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
-        </section>
-      `;
-    })
-    .join("");
+  if (pregunta.tipo === "text") {
+    contenidoPregunta = `
+      <div class="option-list">
+        <input
+          type="text"
+          class="text-answer"
+          id="q${pregunta.numero}"
+          name="q${pregunta.numero}"
+          placeholder="${pregunta.placeholder || "Escribí tu respuesta acá"}"
+        />
+      </div>
+    `;
+  }
+
+  return contenidoPregunta;
 }
 
+function renderizarPregunta(pregunta) {
+  return `
+    <section class="question-card" id="question-${pregunta.numero}">
+      <div class="question-number">${pregunta.numero}</div>
+      <div class="question-title">
+        ${formatearEnunciado(pregunta.enunciado)}
+      </div>
+      ${renderizarContenidoPregunta(pregunta)}
+      <div class="question-feedback" id="feedback-${pregunta.numero}"></div>
+    </section>
+  `;
+}
+
+function renderQuestions() {
+  if (QUIZ_DATA.modo === "bloques_codigo" && Array.isArray(QUIZ_DATA.bloques)) {
+    questionsContainer.classList.add("block-mode");
+
+    questionsContainer.innerHTML = QUIZ_DATA.bloques
+      .map((bloque) => {
+        const preguntasHtml = (bloque.preguntas || [])
+          .map((pregunta) => renderizarPregunta(pregunta))
+          .join("");
+
+        return `
+          <section class="code-group-card" id="${bloque.id}">
+            <header class="code-group-header">
+              <span class="code-group-kicker">${escapeHtml(bloque.lenguaje || "Código")}</span>
+              <h3>${escapeHtml(bloque.titulo || "")}</h3>
+            </header>
+
+            <pre class="code-block shared-code"><code>${escapeHtml(bloque.codigo || "")}</code></pre>
+
+            <div class="block-questions">
+              ${preguntasHtml}
+            </div>
+          </section>
+        `;
+      })
+      .join("");
+
+    return;
+  }
+
+  questionsContainer.classList.remove("block-mode");
+
+  questionsContainer.innerHTML = QUIZ_DATA.preguntas
+    .map((pregunta) => renderizarPregunta(pregunta))
+    .join("");
+}
+function obtenerTodasLasPreguntas() {
+  if (QUIZ_DATA.modo === "bloques_codigo" && Array.isArray(QUIZ_DATA.bloques)) {
+    return QUIZ_DATA.bloques.flatMap((bloque) => bloque.preguntas || []);
+  }
+
+  return QUIZ_DATA.preguntas || [];
+}
 function setStatus(element, type, message) {
   if (!element) return;
 
@@ -229,7 +271,7 @@ async function procesarLoginConToken(idToken) {
 }
 
 function obtenerRespuestas() {
-  return QUIZ_DATA.preguntas.map((pregunta) => {
+  return obtenerTodasLasPreguntas().map((pregunta) => {
     const datosPregunta = {
       numero: pregunta.numero,
       tipo: pregunta.tipo,
@@ -275,7 +317,7 @@ function obtenerRespuestas() {
 }
 
 function obtenerPreguntasSinResponder() {
-  return QUIZ_DATA.preguntas.filter((pregunta) => {
+  return obtenerTodasLasPreguntas().filter((pregunta) => {
     if (pregunta.tipo === "radio") {
       const seleccionada = document.querySelector(
         `input[name="q${pregunta.numero}"]:checked`,
