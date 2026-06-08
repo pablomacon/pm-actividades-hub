@@ -106,7 +106,28 @@ body {
 .main-nav a:hover {
   color: var(--teal);
 }
+.logout-btn {
+  margin-left: auto;
+  border: 2px solid var(--teal);
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: var(--teal);
+  color: var(--white);
+  font-weight: bold;
+  font-family: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
 
+.logout-btn:hover {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--white);
+}
 /* HEADER COMPACTO AL HACER SCROLL */
 
 .site-header.compact {
@@ -144,6 +165,20 @@ body {
 
 .site-header.compact .main-nav a:hover {
   color: var(--teal);
+}
+
+.site-header.compact .logout-btn {
+  background: var(--teal);
+  color: var(--white);
+  border-color: var(--teal);
+  padding: 7px 14px;
+  font-size: 0.85rem;
+}
+
+.site-header.compact .logout-btn:hover {
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
 }
 
 /* MAIN */
@@ -186,7 +221,20 @@ main {
   gap: 24px;
   margin-bottom: 50px;
 }
+.security-notice {
+  background: linear-gradient(90deg, rgba(0, 169, 157, 0.14), #ffffff);
+  border-left: 6px solid var(--teal);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  color: var(--black);
+  font-size: 1rem;
+}
 
+.security-notice strong {
+  color: var(--black);
+}
 /* CARD */
 
 .card {
@@ -351,6 +399,10 @@ footer small {
 
   .hero h2 {
     font-size: 1.6rem;
+  }
+  .logout-btn {
+    margin-left: 0;
+    align-self: flex-start;
   }
 }
 .card-realizada {

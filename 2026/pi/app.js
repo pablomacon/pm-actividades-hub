@@ -3,6 +3,7 @@ const API = "https://backend-ejercicios-pm.vercel.app/api";
 const loginBox = document.getElementById("loginBox");
 const contenedor = document.getElementById("actividadesContainer");
 const loginStatus = document.getElementById("loginStatus");
+const logoutBtn = document.getElementById("logoutBtn");
 
 let idToken = sessionStorage.getItem("pm_id_token");
 
@@ -10,6 +11,35 @@ function mostrarMensajeLogin(mensaje) {
   if (loginStatus) {
     loginStatus.textContent = mensaje || "";
   }
+}
+function cerrarSesionSegura() {
+  sessionStorage.removeItem("pm_id_token");
+  sessionStorage.clear();
+
+  localStorage.removeItem("pm_id_token");
+  localStorage.removeItem("estudiante");
+  localStorage.removeItem("currentStudent");
+  localStorage.removeItem("ayudante_estudiante");
+  localStorage.removeItem("ayudante_user");
+
+  if (window.google && google.accounts && google.accounts.id) {
+    google.accounts.id.disableAutoSelect();
+  }
+
+  idToken = null;
+
+  loginBox.style.display = "block";
+  contenedor.style.display = "none";
+
+  mostrarMensajeLogin(
+    "Sesión cerrada. En una computadora compartida, revisá también que tu cuenta de Google no haya quedado abierta en el navegador.",
+  );
+
+  iniciarLoginGoogle();
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", cerrarSesionSegura);
 }
 
 function iniciarLoginGoogle() {
