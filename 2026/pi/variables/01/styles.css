@@ -514,3 +514,12 @@ body.authorized .activity-overlay {
   background: #f4f2f5;
   color: #827d7d;
 }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #6f5aa6;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

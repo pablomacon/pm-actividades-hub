@@ -1,4 +1,4 @@
-const API = "https://backend-ejercicios-pm.vercel.app/api";
+const API = window.APP_CONFIG.apiBaseUrl;
 
 const loginBox = document.getElementById("loginBox");
 const contenedor = document.getElementById("actividadesContainer");
@@ -6,6 +6,41 @@ const loginStatus = document.getElementById("loginStatus");
 const logoutBtn = document.getElementById("logoutBtn");
 
 let idToken = sessionStorage.getItem("pm_id_token");
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getSafeActivityUrl(value) {
+  try {
+    const rawUrl = String(value || "");
+    const moduleIndex = window.location.pathname.indexOf("/2026/");
+    const projectBasePath =
+      moduleIndex >= 0
+        ? window.location.pathname.slice(0, moduleIndex + 1)
+        : "/";
+    const activityUrl = rawUrl.startsWith("/2026/")
+      ? `${projectBasePath}${rawUrl.slice(1)}`
+      : rawUrl;
+    const url = new URL(activityUrl, window.location.href);
+    return url.origin === window.location.origin ? url.href : "#";
+  } catch {
+    return "#";
+  }
+}
+
+function buildRevisionUrl(activityUrl) {
+  if (activityUrl === "#") return "#";
+
+  const url = new URL(activityUrl);
+  url.searchParams.set("modo", "revision");
+  return url.href;
+}
 
 function mostrarMensajeLogin(mensaje) {
   if (loginStatus) {
@@ -114,8 +149,8 @@ function normalizarIntentos(valor) {
 }
 
 function renderBotonesActividad(a, intentosRealizados) {
-  const urlActividad = a.url;
-  const urlRevision = `${a.url}?modo=revision`;
+  const urlActividad = getSafeActivityUrl(a.url);
+  const urlRevision = buildRevisionUrl(urlActividad);
 
   if (intentosRealizados === 0) {
     return `
@@ -163,8 +198,8 @@ function renderActividades(actividades) {
 
       return `
         <article class="card ${realizada ? "card-realizada" : "card-pendiente"}">
-          <h3>${a.titulo}</h3>
-          <p>${a.descripcion || ""}</p>
+          <h3>${escapeHtml(a.titulo)}</h3>
+          <p>${escapeHtml(a.descripcion)}</p>
           ${badge}
           ${info}
           ${botones}

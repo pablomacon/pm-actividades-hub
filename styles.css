@@ -427,3 +427,21 @@ footer small {
   gap: 10px;
   align-items: center;
 }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #6f5aa6;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

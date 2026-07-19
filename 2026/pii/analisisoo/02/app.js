@@ -20,6 +20,15 @@ let intentoGuardado = false;
 const params = new URLSearchParams(window.location.search);
 const modoRevision = params.get("modo") === "revision";
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function renderQuestions() {
   questionsContainer.innerHTML = QUIZ_DATA.preguntas
     .map((pregunta) => {
@@ -247,10 +256,10 @@ function mostrarResultado(resultado) {
   resultBox.style.display = "block";
   resultBox.className = `result-box ${resultado.claseResultado}`;
   resultBox.innerHTML = `
-    <strong>Resultado:</strong> ${resultado.puntajeObtenido}/${resultado.puntajeTotal}<br>
-    <strong>Porcentaje:</strong> ${resultado.porcentaje}%<br>
-    <strong>Juicio:</strong> ${resultado.juicio}<br>
-    <strong>Devolución:</strong> ${resultado.devolucion}
+    <strong>Resultado:</strong> ${escapeHtml(resultado.puntajeObtenido)}/${escapeHtml(resultado.puntajeTotal)}<br>
+    <strong>Porcentaje:</strong> ${escapeHtml(resultado.porcentaje)}%<br>
+    <strong>Juicio:</strong> ${escapeHtml(resultado.juicio)}<br>
+    <strong>Devolución:</strong> ${escapeHtml(resultado.devolucion)}
   `;
 }
 
@@ -471,10 +480,10 @@ async function procesarEnvioActividad() {
 
   if (guardado.ok) {
     intentoGuardado = true;
-    resultBox.innerHTML += `<br><strong>Intento guardado:</strong> ${guardado.numero_intento}`;
+    resultBox.innerHTML += `<br><strong>Intento guardado:</strong> ${escapeHtml(guardado.numero_intento)}`;
     submitBtn.textContent = "Intento enviado";
   } else {
-    resultBox.innerHTML += `<br><strong>Error al guardar:</strong> ${guardado.message}`;
+    resultBox.innerHTML += `<br><strong>Error al guardar:</strong> ${escapeHtml(guardado.message)}`;
     submitBtn.disabled = false;
     submitBtn.textContent = "Enviar actividad";
   }
