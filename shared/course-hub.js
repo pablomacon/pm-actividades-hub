@@ -54,7 +54,16 @@ function renderBotonesActividad(actividad, intentos) {
   return `<a href="${urlRevision}" class="btn btn-done">Ver mejor intento</a>`;
 }
 function renderActividades(actividades) {
-  contenedor.innerHTML = actividades.map((actividad) => {
+  const actividadesOrdenadas = [...actividades].sort((primera, segunda) => {
+    const ordenPrimera = Number(primera.orden) || 0;
+    const ordenSegunda = Number(segunda.orden) || 0;
+
+    if (ordenPrimera !== ordenSegunda) return ordenSegunda - ordenPrimera;
+
+    return (Number(segunda.id) || 0) - (Number(primera.id) || 0);
+  });
+
+  contenedor.innerHTML = actividadesOrdenadas.map((actividad) => {
     const intentos = Number(actividad.intentos_realizados || 0) || 0; const realizada = intentos > 0; const agotada = intentos >= 2;
     const estado = !realizada ? "Pendiente" : agotada ? "Realizada" : "Realizada: queda un intento disponible";
     const info = realizada ? `<p><strong>Mejor:</strong> ${actividad.mejor_porcentaje}%</p><p><strong>Intentos:</strong> ${intentos} de 2</p>` : `<p><strong>Intentos:</strong> 0 de 2</p>`;
