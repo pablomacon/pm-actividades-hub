@@ -47,11 +47,14 @@ function formatearEnunciado(enunciado) {
 
     return (
       limpia.startsWith("int ") ||
+      limpia.startsWith("int[] ") ||
       limpia.startsWith("double ") ||
       limpia.startsWith("float ") ||
       limpia.startsWith("String ") ||
+      limpia.startsWith("String[] ") ||
       limpia.startsWith("boolean ") ||
       limpia.startsWith("char ") ||
+      limpia.startsWith("char[] ") ||
       limpia.startsWith("if ") ||
       limpia.startsWith("if (") ||
       limpia.startsWith("else") ||
