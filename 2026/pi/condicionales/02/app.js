@@ -338,9 +338,34 @@ function respuestaIncluyeValor(respuestaDada, valor) {
     .includes(valor);
 }
 
+function textoDeRespuesta(pregunta, valor) {
+  const valores = normalizarTextoRespuesta(valor)
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!valores.length || !pregunta) return "";
+
+  if (pregunta.tipo === "radio" || pregunta.tipo === "checkbox") {
+    const textos = valores
+      .map((codigo) =>
+        (pregunta.opciones || []).find((opcion) => opcion.valor === codigo)
+          ?.texto,
+      )
+      .filter(Boolean);
+
+    if (textos.length === valores.length) return textos.join(" · ");
+  }
+
+  return valores.join(" · ");
+}
+
 function aplicarRevision(respuestas) {
   respuestas.forEach((respuesta) => {
     const numero = respuesta.numero_pregunta;
+    const pregunta = QUIZ_DATA.preguntas.find(
+      (item) => item.numero === Number(numero),
+    );
     const preguntaCard = document.getElementById(`question-${numero}`);
     const feedback = document.getElementById(`feedback-${numero}`);
 
@@ -368,7 +393,14 @@ function aplicarRevision(respuestas) {
       preguntaCard.classList.add("question-incorrect");
 
       if (respuesta.respuesta_correcta) {
-        feedback.textContent = `Incorrecta. Respuesta esperada: ${respuesta.respuesta_correcta}`;
+        const respuestaEsperada = textoDeRespuesta(
+          pregunta,
+          respuesta.respuesta_correcta,
+        );
+
+        feedback.textContent = respuestaEsperada
+          ? `Incorrecta. Respuesta esperada: ${respuestaEsperada}`
+          : "Incorrecta.";
       } else {
         feedback.textContent = "Incorrecta.";
       }
