@@ -1,0 +1,7 @@
+.text-evidence textarea {
+  min-height: 320px;
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  line-height: 1.45;
+  tab-size: 4;
+  white-space: pre;
+}
