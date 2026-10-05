@@ -46,6 +46,9 @@ function formatearEnunciado(enunciado) {
     const limpia = linea.trim();
 
     return (
+      limpia.startsWith("public ") ||
+      limpia.startsWith("private ") ||
+      limpia.startsWith("static ") ||
       limpia.startsWith("int ") ||
       limpia.startsWith("int[] ") ||
       limpia.startsWith("double ") ||
