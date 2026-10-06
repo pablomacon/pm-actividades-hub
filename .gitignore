@@ -1,2 +1,9 @@
 # Scripts SQL con datos de configuración y claves de corrección: conservar solo localmente.
 *.sql
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
