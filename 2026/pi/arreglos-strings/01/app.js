@@ -29,7 +29,12 @@ async function post(path, body) {
 }
 function blockOf(numero) { return Math.ceil(numero / 10); }
 function renderTabs() {
-  byId("blockTabs").innerHTML = [1,2,3,4,5].map((block) => `<button class="block-tab" type="button" data-block="${block}" aria-selected="${block === bloqueActual}">Bloque ${block} · ${ARREGLOS_STRINGS_EJERCICIOS[(block-1)*10].nivel}</button>`).join("");
+  const totalBloques = Math.ceil(ARREGLOS_STRINGS_EJERCICIOS.length / 10);
+  const bloques = Array.from({ length: totalBloques }, (_, indice) => indice + 1);
+  byId("blockTabs").innerHTML = bloques.map((block) => {
+    const primerEjercicio = ARREGLOS_STRINGS_EJERCICIOS[(block - 1) * 10];
+    return `<button class="block-tab" type="button" data-block="${block}" aria-selected="${block === bloqueActual}">Bloque ${block} · ${primerEjercicio.nivel}</button>`;
+  }).join("");
   byId("blockTabs").querySelectorAll("button").forEach((button) => button.addEventListener("click", () => { bloqueActual = Number(button.dataset.block); render(); }));
 }
 function renderExercise(ejercicio) {
