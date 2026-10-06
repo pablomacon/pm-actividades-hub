@@ -20,6 +20,10 @@ function buildRevisionUrl(activityUrl) {
   if (activityUrl === "#") return "#";
   const url = new URL(activityUrl); url.searchParams.set("modo", "revision"); return url.href;
 }
+function prioridadTema(tema) {
+  const prioridades = { metodos: 5, arreglos: 4, "arreglos-strings": 4, iterativas: 3, condicionales: 2, variables: 1 };
+  return prioridades[String(tema || "").toLowerCase()] || 0;
+}
 function mostrarMensajeLogin(mensaje) { if (loginStatus) loginStatus.textContent = mensaje || ""; }
 function cerrarSesionSegura() {
   sessionStorage.removeItem("pm_id_token");
@@ -55,6 +59,10 @@ function renderBotonesActividad(actividad, intentos) {
 }
 function renderActividades(actividades) {
   const actividadesOrdenadas = [...actividades].sort((primera, segunda) => {
+    const prioridadPrimera = prioridadTema(primera.tema);
+    const prioridadSegunda = prioridadTema(segunda.tema);
+    if (prioridadPrimera !== prioridadSegunda) return prioridadSegunda - prioridadPrimera;
+
     const ordenPrimera = Number(primera.orden) || 0;
     const ordenSegunda = Number(segunda.orden) || 0;
 
