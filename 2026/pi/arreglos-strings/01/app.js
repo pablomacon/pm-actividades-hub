@@ -1,7 +1,7 @@
 const API = window.APP_CONFIG.apiBaseUrl;
 const MAX_BYTES = window.APP_CONFIG.entregaMaxBytes;
 const ALLOWED_EXTENSIONS = new Set(["zip", "jpg", "jpeg", "png", "txt", "java"]);
-const SESSION_STORAGE_KEY = "pm_entregas_session";
+const SESSION_STORAGE_KEY = `pm_entregas_session_${window.APP_CONFIG.activitySlug}`;
 let sessionToken = sessionStorage.getItem(SESSION_STORAGE_KEY);
 let entregas = new Map();
 let bloqueActual = 1;
@@ -12,7 +12,7 @@ function setStatus(id, type, message) { const el = byId(id); if (el) { el.classN
 async function post(path, body) {
   let response;
   try {
-    response = await fetch(`${API}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionToken, ...body }) });
+    response = await fetch(`${API}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionToken, activitySlug: window.APP_CONFIG.activitySlug, ...body }) });
   } catch (cause) {
     const error = new Error("No pudimos comunicarnos con el servidor. Estamos comprobando si la entrega quedó guardada.");
     error.isNetworkError = true;
