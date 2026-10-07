@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profe Macón | Introducción a la POO en Java</title>
+    <link rel="stylesheet" href="../../../../styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header"><div class="header-container">
+      <a href="../../" class="logo-link"><img src="../../../../assets/LogoProfeMacon.jpg" alt="Logo Profe Macón" class="main-logo" /></a>
+      <div class="title-block"><h1>Programación I</h1><p>Introducción a la POO en Java</p></div>
+      <nav class="main-nav"><a href="../../">← Volver a actividades</a></nav>
+    </div></header>
+    <main class="page-shell">
+      <section class="hero">
+        <div><span class="eyebrow">Teoría y entregas</span><h1>Ordenar la realidad dentro del programa</h1><p>La Programación Orientada a Objetos ayuda a representar un problema mediante objetos, sus características y sus comportamientos.</p></div>
+        <aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside>
+      </section>
+      <section class="activity" id="activity" hidden>
+        <p class="status-box info" id="pageStatus" aria-live="polite"></p>
+        <nav class="section-nav" aria-label="Navegación de la actividad"><a href="#problema">El problema</a><a href="#abstraccion">Abstracción</a><a href="#clases">Clases y objetos</a><a href="#atributos">Atributos y métodos</a><a href="#encapsulamiento">Encapsulamiento</a><a href="#ejercicios">Ejercicios</a></nav>
+        <section id="problema"><h2>1. El problema de tener todo junto</h2><p>Hasta ahora muchos programas estaban en un solo archivo, casi siempre en <code>Main.java</code>. Al crecer, allí se mezclan datos, cálculos, mensajes, condiciones, validaciones y resultados. Esto vuelve el programa difícil de leer, corregir y ampliar.</p><p>En una agencia de viajes podríamos guardar los datos de clientes, viajes, reservas y precios. La POO propone una forma de ordenar esa información.</p></section>
+        <section id="abstraccion"><h2>2. Objetos y abstracción</h2><p>Un objeto representa una parte simplificada del problema: una persona, un vehículo, una reserva o un jugador. No copiamos toda la realidad: elegimos los aspectos que sirven para el programa. Ese recorte se llama <strong>abstracción</strong>.</p><p>La misma persona necesita datos distintos en una agencia de viajes, un club deportivo, un sistema médico o un juego de fútbol.</p></section>
+        <section id="clases"><h2>3. Clase y objeto</h2><p>Una clase es un molde que define las características y los comportamientos de objetos del mismo tipo. <code>Cliente</code> es una clase; <code>cliente1</code> y <code>cliente2</code> son objetos concretos que pueden tener datos diferentes.</p><pre><code>public class Cliente {
+  private String nombre;
+  private String documento;
+  private int edad;
+  private String nacionalidad;
+}</code></pre></section>
+        <section id="atributos"><h2>4. Atributos y métodos</h2><p>Los atributos son las características que decidimos guardar. Los métodos representan los comportamientos que el objeto necesita realizar dentro del programa.</p><pre><code>public void abonarViaje() {
+  System.out.println("El viaje fue abonado");
+}</code></pre><p>La pregunta es: ¿qué necesito saber de este objeto y qué necesito que pueda hacer para resolver este problema?</p></section>
+        <section id="encapsulamiento"><h2>5. Encapsulamiento</h2><p>Encapsular es proteger los datos y controlar cómo se accede a ellos. Los atributos se declaran con <code>private</code>; luego se usan métodos como <code>getNombre()</code> y <code>setNombre()</code> para consultar o cambiar valores de forma controlada.</p><p>Usar POO ayuda a ordenar el código, separar responsabilidades, reutilizar clases y ampliar un programa sin destruir lo que ya funciona.</p></section>
+        <section id="ejercicios"><h2>Actividades</h2><p>Completá todas las respuestas de un ejercicio antes de entregarlo. Podés reenviarlo si querés mejorar tu respuesta: se conserva la versión más reciente para la revisión docente.</p><div id="forms" class="forms"></div></section>
+      </section>
+    </main>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="../../../../shared/config.js"></script>
+    <script src="config.js"></script>
+    <script src="../../../../shared/auth.js"></script>
+    <script src="app.js"></script>
+    <script src="../../../../header.js"></script>
+  </body>
+</html>

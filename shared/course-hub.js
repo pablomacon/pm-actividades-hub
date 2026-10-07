@@ -20,10 +20,6 @@ function buildRevisionUrl(activityUrl) {
   if (activityUrl === "#") return "#";
   const url = new URL(activityUrl); url.searchParams.set("modo", "revision"); return url.href;
 }
-function prioridadTema(tema) {
-  const prioridades = { metodos: 5, arreglos: 4, "arreglos-strings": 4, iterativas: 3, condicionales: 2, variables: 1 };
-  return prioridades[String(tema || "").toLowerCase()] || 0;
-}
 function mostrarMensajeLogin(mensaje) { if (loginStatus) loginStatus.textContent = mensaje || ""; }
 function cerrarSesionSegura() {
   sessionStorage.removeItem("pm_id_token");
@@ -59,19 +55,22 @@ function renderBotonesActividad(actividad, intentos) {
 }
 function renderActividades(actividades) {
   const actividadesOrdenadas = [...actividades].sort((primera, segunda) => {
-    const prioridadPrimera = prioridadTema(primera.tema);
-    const prioridadSegunda = prioridadTema(segunda.tema);
-    if (prioridadPrimera !== prioridadSegunda) return prioridadSegunda - prioridadPrimera;
-
-    const ordenPrimera = Number(primera.orden) || 0;
-    const ordenSegunda = Number(segunda.orden) || 0;
-
-    if (ordenPrimera !== ordenSegunda) return ordenSegunda - ordenPrimera;
-
+    const fechaPrimera = Date.parse(primera.fecha_creacion || "") || 0;
+    const fechaSegunda = Date.parse(segunda.fecha_creacion || "") || 0;
+    if (fechaPrimera !== fechaSegunda) return fechaSegunda - fechaPrimera;
     return (Number(segunda.id) || 0) - (Number(primera.id) || 0);
   });
 
   contenedor.innerHTML = actividadesOrdenadas.map((actividad) => {
+    const entregasTotales = Number(actividad.entregas_totales || 0);
+    if (entregasTotales > 0) {
+      const entregasRealizadas = Number(actividad.entregas_realizadas || 0);
+      const realizada = entregasRealizadas > 0;
+      const estado = entregasRealizadas >= entregasTotales ? "Entregada" : realizada ? "En curso" : "Pendiente";
+      const accion = entregasRealizadas ? "Continuar actividad" : "Comenzar actividad";
+      const urlActividad = getSafeActivityUrl(actividad.url);
+      return `<article class="card ${realizada ? "card-realizada" : "card-pendiente"}"><h3>${escapeHtml(actividad.titulo)}</h3><p>${escapeHtml(actividad.descripcion)}</p><p><strong>Estado:</strong> ${estado}</p><p><strong>Entregas:</strong> ${entregasRealizadas} de ${entregasTotales}</p><a href="${urlActividad}" class="btn">${accion}</a></article>`;
+    }
     const intentos = Number(actividad.intentos_realizados || 0) || 0; const realizada = intentos > 0; const agotada = intentos >= 2;
     const estado = !realizada ? "Pendiente" : agotada ? "Realizada" : "Realizada: queda un intento disponible";
     const info = realizada ? `<p><strong>Mejor:</strong> ${actividad.mejor_porcentaje}%</p><p><strong>Intentos:</strong> ${intentos} de 2</p>` : `<p><strong>Intentos:</strong> 0 de 2</p>`;
