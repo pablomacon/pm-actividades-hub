@@ -14,18 +14,48 @@
       <nav class="main-nav"><a href="../../">← Volver a actividades</a></nav>
     </div></header>
     <main class="page-shell">
-      <section class="hero"><div><span class="eyebrow">POO · Actividad de entrega</span><h1>Del problema al objeto</h1><p>Vamos a elegir qué parte de la realidad necesitamos representar en un programa.</p></div><aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside></section>
+      <section class="delivery-hero modelado-hero">
+        <div class="hero-content">
+          <span class="eyebrow">POO · Actividad de entrega</span>
+          <h1>De la realidad al objeto</h1>
+          <p>En la vida real, un objeto tiene muchísimas características y puede participar en muchas acciones. Un programa no necesita representar todo. Vamos a elegir solamente la información y los comportamientos necesarios para resolver nuestro problema.</p>
+          <div class="learning-path" aria-label="Recorrido de aprendizaje: realidad, selección y modelo"><strong>REALIDAD</strong><span aria-hidden="true">→</span><span>seleccionamos lo importante</span><span aria-hidden="true">→</span><strong>MODELO</strong></div>
+          <div class="concept-key"><span><strong>Atributos</strong> = datos que necesitamos guardar</span><span><strong>Métodos</strong> = acciones que necesitamos representar</span></div>
+        </div>
+        <aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside>
+      </section>
       <section class="activity" id="activity" hidden>
         <p class="status-box info" id="pageStatus" aria-live="polite"></p>
-        <p><strong>Situación:</strong> una biblioteca quiere desarrollar un pequeño programa para administrar sus libros y los préstamos.</p>
         <form id="modelForm" class="delivery-form">
-          <fieldset><legend>1. Identificar el objeto</legend><label>¿Cuál considerás que es el objeto principal que deberíamos representar en este problema?<textarea name="objetoPrincipal" required></textarea></label></fieldset>
-          <fieldset><legend>2. Características posibles</legend><p>Seleccioná las características que un libro puede tener en la realidad.</p><div id="caracteristicasPosibles" class="choices"></div></fieldset>
-          <fieldset><legend>3. Atributos necesarios</legend><p>Ahora pensá exclusivamente en el programa de préstamos. Seleccioná los datos que tendría sentido guardar.</p><div id="atributosNecesarios" class="choices"></div></fieldset>
-          <fieldset><legend>4. Comportamientos posibles</legend><p>Seleccioná comportamientos o acciones que pueden relacionarse con un libro en la realidad.</p><div id="comportamientosPosibles" class="choices"></div></fieldset>
-          <fieldset><legend>5. Métodos necesarios</legend><p>Ahora seleccioná solamente los comportamientos que necesitaríamos representar en nuestro programa.</p><div id="metodosNecesarios" class="choices"></div></fieldset>
-          <fieldset><legend>6. Modelo propuesto</legend><label>Nombre de la clase u objeto<input name="nombreModelo" required /></label><div class="field-grid"><div><p>Atributos que incluirías</p><div id="atributosModelo"></div></div><div><p>Métodos que incluirías <small>(podés escribirlos con <code>()</code>)</small></p><div id="metodosModelo"></div></div></div></fieldset>
-          <fieldset><legend>7. Justificación</legend><label>Explicá por qué dejaste fuera al menos una característica y un comportamiento que sí existen en la realidad.<textarea name="justificacion" required></textarea></label></fieldset>
+          <section class="activity-step problem-step" aria-labelledby="paso-problema">
+            <p class="step-number">1. Comprender el problema</p><h2 id="paso-problema">Una biblioteca y sus libros</h2>
+            <p>Una biblioteca quiere comenzar a informatizar el préstamo de sus libros.</p><p>El programa deberá permitir:</p><ul><li>identificar cada libro;</li><li>saber si está disponible;</li><li>prestarlo;</li><li>registrar su devolución;</li><li>consultar sus datos principales.</li></ul>
+            <p>Por ahora no vamos a programar el sistema completo. Vamos a concentrarnos en un solo objeto y decidir cómo representarlo.</p>
+            <label for="objetoPrincipal">¿Cuál considerás que es el objeto principal que deberíamos representar en este problema?<textarea id="objetoPrincipal" name="objetoPrincipal" required></textarea></label>
+          </section>
+          <section class="activity-step" aria-labelledby="paso-datos">
+            <p class="step-number">2. Elegir los datos</p><h2 id="paso-datos">De características a atributos</h2>
+            <fieldset><legend>2. Características del mundo real</legend><p>Un libro real tiene muchas características. Marcá todas las que podrían describirlo, aunque después no sean necesarias para nuestro programa.</p><div id="caracteristicasPosibles" class="choices"></div></fieldset>
+            <p class="transition-note">No todo lo que existe en la realidad tiene que entrar al programa.</p>
+            <fieldset><legend>3. Atributos necesarios</legend><p>Ahora vuelve a mirar la misma lista, pero piensa solamente en nuestro programa de préstamos. Marcá los datos que realmente necesitaríamos guardar.</p><div id="atributosNecesarios" class="choices"></div></fieldset>
+          </section>
+          <section class="activity-step" aria-labelledby="paso-acciones">
+            <p class="step-number">3. Elegir las acciones</p><h2 id="paso-acciones">De comportamientos a métodos</h2>
+            <fieldset><legend>4. Comportamientos del mundo real</legend><p>Un libro puede participar en muchas acciones o situaciones. Marcá las que podrían ocurrir en la realidad.</p><div id="comportamientosPosibles" class="choices"></div></fieldset>
+            <p class="transition-note"><strong>Comportamiento necesario</strong> → <strong>método</strong></p>
+            <fieldset><legend>5. Métodos necesarios</legend><p>Ahora piensa como programador. Marcá solamente las acciones que nuestro programa necesita representar.</p><div id="metodosNecesarios" class="choices"></div></fieldset>
+          </section>
+          <section class="activity-step" aria-labelledby="paso-modelo">
+            <p class="step-number">4. Construir el modelo</p><h2 id="paso-modelo">Modelo propuesto</h2><p>Ya hiciste el recorte de la realidad. Ahora construí una primera representación del objeto.</p>
+            <div class="class-card">
+              <label class="class-name" for="nombreModelo"><span>Nombre de la clase u objeto</span><input id="nombreModelo" name="nombreModelo" required placeholder="Libro" /></label>
+              <div class="class-section"><h3>Atributos</h3><div id="atributosModelo" class="model-fields"></div></div>
+              <div class="class-section"><h3>Métodos</h3><p class="class-help">Las acciones del objeto se pueden escribir con <code>()</code>.</p><div id="metodosModelo" class="model-fields methods"></div></div>
+            </div>
+          </section>
+          <section class="activity-step decision-step" aria-labelledby="paso-decision">
+            <p class="step-number">5. Explicar una decisión</p><h2 id="paso-decision">¿Qué dejaste fuera?</h2><label for="justificacion">Elegí una característica que no incluiste como atributo y un comportamiento que no convertiste en método. Explicá brevemente por qué no son necesarios para este programa.<textarea id="justificacion" name="justificacion" required></textarea></label>
+          </section>
           <div class="form-actions"><button class="btn" type="submit">Entregar actividad</button><span id="formMessage" aria-live="polite"></span></div>
         </form>
       </section>

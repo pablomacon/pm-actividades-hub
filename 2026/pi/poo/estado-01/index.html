@@ -1,10 +1,23 @@
 <!doctype html>
 <html lang="es">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Profe Macón | ¿Quién puede cambiar los datos?</title><link rel="stylesheet" href="../../../../styles.css" /><link rel="stylesheet" href="styles.css" /></head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profe Macón | ¿Quién puede cambiar los datos?</title>
+    <link rel="stylesheet" href="../../../../styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
   <body>
     <header class="site-header"><div class="header-container"><a href="../../" class="logo-link"><img src="../../../../assets/LogoProfeMacon.jpg" alt="Logo Profe Macón" class="main-logo" /></a><div class="title-block"><h1>Programación I</h1><p>¿Quién puede cambiar los datos?</p></div><nav class="main-nav"><a href="../../">← Volver a actividades</a></nav></div></header>
-    <main class="page-shell"><section class="hero"><div><span class="eyebrow">POO · Actividad de entrega</span><h1>¿Quién puede cambiar los datos?</h1><p>Observá qué ocurre cuando cualquier parte de un programa puede cambiar un dato.</p></div><aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside></section>
-      <section id="activity" class="activity" hidden><p id="pageStatus" class="status-box info" aria-live="polite"></p><pre><code>public class Jugador {
+    <main class="page-shell">
+      <section class="delivery-hero estado-hero">
+        <div class="hero-content"><span class="eyebrow">POO · Actividad de entrega</span><h1>Los objetos tienen un estado</h1><p>En la actividad anterior decidimos qué datos y qué acciones necesitaba nuestro objeto. Ahora vamos a observar algo nuevo: ¿quién puede cambiar esos datos?</p><div class="state-map" aria-label="Jugador: nombre y goles forman su estado; marcarGol es una acción que puede modificar ese estado"><strong>Jugador</strong><span><code>nombre</code> + <code>goles</code> → estado</span><span><code>marcarGol()</code> → acción que puede modificar ese estado</span></div><p class="hero-close">Vamos a seguir al mismo objeto paso a paso y descubrir un problema.</p></div>
+        <aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside>
+      </section>
+      <section id="activity" class="activity" hidden>
+        <p id="pageStatus" class="status-box info" aria-live="polite"></p>
+        <form id="stateForm" class="delivery-form">
+          <section class="activity-step" aria-labelledby="contexto"><p class="step-number">La historia</p><h2 id="contexto">Un programa para registrar jugadores</h2><p>Estamos creando un pequeño programa para registrar jugadores de fútbol. De cada jugador queremos guardar su nombre y la cantidad de goles. Además, cuando marque un gol, queremos que el propio objeto pueda actualizar ese dato.</p><h3>La clase inicial</h3><pre><code>public class Jugador {
 
     String nombre;
     int goles;
@@ -12,13 +25,19 @@
     public void marcarGol() {
         goles++;
     }
-}</code></pre><pre><code>Jugador jugador1 = new Jugador();
+}</code></pre><div class="code-key"><span><code>nombre</code> → dato del jugador</span><span><code>goles</code> → dato que puede cambiar</span><span><code>marcarGol()</code> → acción que modifica <code>goles</code></span></div></section>
+          <section class="activity-step" aria-labelledby="paso-crear"><p class="step-number">Paso 1 · Creamos un jugador</p><h2 id="paso-crear">Conocemos a <code>jugador1</code></h2><pre><code>Jugador jugador1 = new Jugador();
 
 jugador1.nombre = "Lucía";
-jugador1.goles = 0;
-
-jugador1.marcarGol();</code></pre>
-        <form id="stateForm" class="delivery-form"><fieldset><legend>1. Pensá el resultado</legend><p>Después de ejecutar <code>marcarGol()</code>, ¿cuánto vale <code>goles</code>?</p><div class="options"><label><input required type="radio" name="resultadoMarcarGol" value="0"> 0</label><label><input type="radio" name="resultadoMarcarGol" value="1"> 1</label><label><input type="radio" name="resultadoMarcarGol" value="2"> 2</label><label><input type="radio" name="resultadoMarcarGol" value="da error"> Da error</label></div></fieldset><pre><code>jugador1.goles = -300;</code></pre><fieldset><legend>2. Acceso directo</legend><p>¿Java permite hacer esto con la clase tal como está escrita?</p><div class="options"><label><input required type="radio" name="permiteValorInvalido" value="Sí"> Sí</label><label><input type="radio" name="permiteValorInvalido" value="No"> No</label></div><p>¿Tiene sentido que un jugador tenga -300 goles?</p><div class="options"><label><input required type="radio" name="tieneSentidoValorInvalido" value="Sí"> Sí</label><label><input type="radio" name="tieneSentidoValorInvalido" value="No"> No</label></div></fieldset><p>El método <code>marcarGol()</code> controla cómo aumentan los goles, pero otra parte del programa puede modificar <code>goles</code> directamente y colocar cualquier valor.</p><fieldset><legend>3. Tu idea</legend><label>¿Cómo intentarías evitar este problema, aunque todavía no conozcas la solución de Java?<textarea name="propuesta" required></textarea></label></fieldset><div class="form-actions"><button class="btn" type="submit">Entregar actividad</button><span id="formMessage" aria-live="polite"></span></div></form>
-      </section></main><script src="https://accounts.google.com/gsi/client" async defer></script><script src="../../../../shared/config.js"></script><script src="config.js"></script><script src="../../../../shared/auth.js"></script><script src="app.js"></script><script src="../../../../header.js"></script>
+jugador1.goles = 0;</code></pre><p>Hasta este momento, <code>jugador1</code> representa a Lucía y tiene 0 goles.</p><p class="state-badge"><strong>Lucía</strong> → <code>goles = 0</code></p></section>
+          <section class="activity-step" aria-labelledby="paso-gol"><p class="step-number">Paso 2 · El jugador marca un gol</p><h2 id="paso-gol">El objeto cambia su propio estado</h2><pre><code>jugador1.marcarGol();</code></pre><p class="method-reminder"><code>public void marcarGol() { goles++; }</code></p><fieldset><legend>¿Qué pasó?</legend><p>Después de ejecutar <code>marcarGol()</code>, ¿cuánto vale <code>jugador1.goles</code>?</p><div class="options"><label><input required type="radio" name="resultadoMarcarGol" value="0" /> <span>0</span></label><label><input type="radio" name="resultadoMarcarGol" value="1" /> <span>1</span></label><label><input type="radio" name="resultadoMarcarGol" value="2" /> <span>2</span></label><label><input type="radio" name="resultadoMarcarGol" value="da error" /> <span>Da error</span></label></div></fieldset></section>
+          <section class="activity-step direct-access" aria-labelledby="paso-directo"><p class="transition-note"><strong>Hasta aquí todo parece funcionar bien.</strong> Cuando Lucía marca un gol usamos <code>marcarGol()</code> y el propio objeto actualiza sus goles. Pero mirá lo que también podemos hacer desde fuera del objeto.</p><pre><code>jugador1.goles = -300;</code></pre><p>Seguimos trabajando con el mismo objeto: <code>jugador1</code>.</p><p class="step-number">Paso 3 · ¿Java lo permite?</p><h2 id="paso-directo">Lo que permite la clase</h2><fieldset><legend>Una pregunta sobre el lenguaje</legend><p>¿La clase está escrita de forma que esta instrucción pueda ejecutarse?</p><div class="options two-options"><label><input required type="radio" name="permiteValorInvalido" value="Sí" /> <span>Sí</span></label><label><input type="radio" name="permiteValorInvalido" value="No" /> <span>No</span></label></div></fieldset></section>
+          <section class="activity-step" aria-labelledby="paso-modelo"><p class="step-number">Paso 4 · ¿Nuestro modelo debería permitirlo?</p><h2 id="paso-modelo">Lo que tiene sentido para el jugador</h2><p>Supongamos que Java acepta la instrucción.</p><fieldset><legend>Una pregunta sobre el modelo</legend><p>¿Tiene sentido que Lucía pase a tener -300 goles?</p><div class="options two-options"><label><input required type="radio" name="tieneSentidoValorInvalido" value="Sí" /> <span>Sí</span></label><label><input type="radio" name="tieneSentidoValorInvalido" value="No" /> <span>No</span></label></div></fieldset><div class="comparison"><div><code>jugador1.marcarGol();</code><p>El objeto controla cómo cambia <code>goles</code>.</p></div><div><code>jugador1.goles = -300;</code><p>Otra parte del programa coloca directamente cualquier valor.</p></div></div><p class="central-conflict">Entonces, ¿para qué controlamos los goles mediante <code>marcarGol()</code> si alguien puede cambiar <code>goles</code> directamente?</p></section>
+          <section class="activity-step decision-step" aria-labelledby="problema"><p class="step-number">Tenemos un problema</p><h2 id="problema">Una regla para cuidar los datos</h2><p>Queremos que el objeto pueda controlar correctamente sus datos, pero actualmente cualquier parte del programa puede modificar <code>goles</code> directamente.</p><label for="propuesta">Sin buscar todavía la sintaxis de Java: ¿qué regla propondrías para evitar este problema?<textarea id="propuesta" name="propuesta" required></textarea></label><p class="field-help">No necesitás conocer todavía la palabra clave de Java. Explicá la idea con tus propias palabras.</p></section>
+          <div class="form-actions"><button class="btn" type="submit">Entregar actividad</button><span id="formMessage" aria-live="polite"></span></div>
+        </form>
+      </section>
+    </main>
+    <script src="https://accounts.google.com/gsi/client" async defer></script><script src="../../../../shared/config.js"></script><script src="config.js"></script><script src="../../../../shared/auth.js"></script><script src="app.js"></script><script src="../../../../header.js"></script>
   </body>
 </html>
