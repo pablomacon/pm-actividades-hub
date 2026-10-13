@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Profe Macón | Métodos y reglas de negocio: inscripción a talleres optativos</title><link rel="stylesheet" href="../../../../styles.css" /><link rel="stylesheet" href="../../../pi/arreglos-strings/01/styles.css" /><link rel="stylesheet" href="styles.css" /></head>
+<body><header class="site-header" id="siteHeader"><div class="header-container"><a href="../../" class="logo-link"><img src="../../../../assets/LogoProfeMacon.jpg" alt="Logo Profe Macón" class="main-logo" /></a><div class="title-block"><h1>Programación Avanzada</h1><p>Métodos y reglas de negocio</p></div><nav class="main-nav"><a href="../../">← Volver a actividades</a></nav></div></header><main class="page-shell"><section class="delivery-hero"><div><span class="eyebrow">Entrega de código</span><h1>Métodos y reglas de negocio: inscripción a talleres optativos</h1><p>Escribí métodos Java para validar inscripciones a talleres, controlar cupos, detectar repetidos y determinar el estado final de una inscripción.</p></div><aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside></section><section class="context-card"><h2>Contexto: talleres optativos de UTU</h2><p>La UTU ofrece talleres optativos para estudiantes. Cada estudiante puede inscribirse a un taller, pero el sistema debe controlar que los datos sean válidos, que el taller exista, que haya cupo disponible y que no se repita una inscripción.</p><p><strong>Talleres y cupos:</strong> Robótica (5), Podcast (4), Diseño web (6), Ajedrez (8) y Fotografía (5).</p><p>Razoná los métodos como si pertenecieran a una clase <code>InscripcionTallerService</code>. No crees una aplicación completa: escribí solamente los métodos solicitados.</p><pre><code>public class InscripcionTaller {
+    private String estudiante;
+    private String grupo;
+    private String taller;
+    private int edad;
+
+    public InscripcionTaller(String estudiante, String grupo, String taller, int edad) {
+        this.estudiante = estudiante;
+        this.grupo = grupo;
+        this.taller = taller;
+        this.edad = edad;
+    }
+
+    public String getEstudiante() { return estudiante; }
+    public String getGrupo() { return grupo; }
+    public String getTaller() { return taller; }
+    public int getEdad() { return edad; }
+}</code></pre></section><section class="delivery-app" id="deliveryApp" hidden><div class="block-tabs" id="blockTabs" aria-label="Bloques de ejercicios"></div><p class="status-box info" id="pageStatus" aria-live="polite"></p><section id="exercisesContainer" class="exercises-container"></section></section></main><script src="https://accounts.google.com/gsi/client" async defer></script><script src="../../../../shared/config.js"></script><script src="config.js"></script><script src="exercise-data.js"></script><script src="../../../../shared/auth.js"></script><script src="../../../pi/arreglos-strings/01/app.js"></script><script src="../../../../header.js"></script></body></html>
