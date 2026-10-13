@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profe Macón | Del problema al objeto</title>
+    <link rel="stylesheet" href="../../../../styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header"><div class="header-container">
+      <a href="../../" class="logo-link"><img src="../../../../assets/LogoProfeMacon.jpg" alt="Logo Profe Macón" class="main-logo" /></a>
+      <div class="title-block"><h1>Programación I</h1><p>Del problema al objeto</p></div>
+      <nav class="main-nav"><a href="../../">← Volver a actividades</a></nav>
+    </div></header>
+    <main class="page-shell">
+      <section class="hero"><div><span class="eyebrow">POO · Actividad de entrega</span><h1>Del problema al objeto</h1><p>Vamos a elegir qué parte de la realidad necesitamos representar en un programa.</p></div><aside class="login-card" id="loginCard"><h2>Ingresá para comenzar</h2><p>Usá tu cuenta Google habilitada para esta actividad.</p><div id="googleButton"></div><p class="status-box info" id="loginStatus">Esperando inicio de sesión.</p></aside></section>
+      <section class="activity" id="activity" hidden>
+        <p class="status-box info" id="pageStatus" aria-live="polite"></p>
+        <p><strong>Situación:</strong> una biblioteca quiere desarrollar un pequeño programa para administrar sus libros y los préstamos.</p>
+        <form id="modelForm" class="delivery-form">
+          <fieldset><legend>1. Identificar el objeto</legend><label>¿Cuál considerás que es el objeto principal que deberíamos representar en este problema?<textarea name="objetoPrincipal" required></textarea></label></fieldset>
+          <fieldset><legend>2. Características posibles</legend><p>Seleccioná las características que un libro puede tener en la realidad.</p><div id="caracteristicasPosibles" class="choices"></div></fieldset>
+          <fieldset><legend>3. Atributos necesarios</legend><p>Ahora pensá exclusivamente en el programa de préstamos. Seleccioná los datos que tendría sentido guardar.</p><div id="atributosNecesarios" class="choices"></div></fieldset>
+          <fieldset><legend>4. Comportamientos posibles</legend><p>Seleccioná comportamientos o acciones que pueden relacionarse con un libro en la realidad.</p><div id="comportamientosPosibles" class="choices"></div></fieldset>
+          <fieldset><legend>5. Métodos necesarios</legend><p>Ahora seleccioná solamente los comportamientos que necesitaríamos representar en nuestro programa.</p><div id="metodosNecesarios" class="choices"></div></fieldset>
+          <fieldset><legend>6. Modelo propuesto</legend><label>Nombre de la clase u objeto<input name="nombreModelo" required /></label><div class="field-grid"><div><p>Atributos que incluirías</p><div id="atributosModelo"></div></div><div><p>Métodos que incluirías <small>(podés escribirlos con <code>()</code>)</small></p><div id="metodosModelo"></div></div></div></fieldset>
+          <fieldset><legend>7. Justificación</legend><label>Explicá por qué dejaste fuera al menos una característica y un comportamiento que sí existen en la realidad.<textarea name="justificacion" required></textarea></label></fieldset>
+          <div class="form-actions"><button class="btn" type="submit">Entregar actividad</button><span id="formMessage" aria-live="polite"></span></div>
+        </form>
+      </section>
+    </main>
+    <script src="https://accounts.google.com/gsi/client" async defer></script><script src="../../../../shared/config.js"></script><script src="config.js"></script><script src="../../../../shared/auth.js"></script><script src="app.js"></script><script src="../../../../header.js"></script>
+  </body>
+</html>
